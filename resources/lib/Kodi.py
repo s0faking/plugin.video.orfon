@@ -16,15 +16,8 @@ except ModuleNotFoundError:
     from resources.lib.OrfOn import *
 
 
-def translate(translation_id):
-    settings = xbmcaddon.Addon()
-    translation = settings.getLocalizedString
-    return translation(translation_id)
-
-
 class Kodi:
     version_regex = r"plugin:\/\/([^\/]+)"
-    print(sys.argv)
     addon_id = re.search(version_regex, sys.argv[0]).groups()[0]
     addon = Addon()
     data_folder = xbmcvfs.translatePath("special://profile/addon_data/%s" % addon_id)
@@ -54,9 +47,18 @@ class Kodi:
         if not os.path.exists(self.data_folder):
             os.makedirs(self.data_folder)
 
-    @staticmethod
-    def execute(command):
-        executebuiltin(command)
+    def translate(self, translation_id):
+        translation = self.addon.getLocalizedString
+        return translation(translation_id)
+
+    def get_translation(self, translation_id, fallback, replace=None):
+        translation = self.translate(translation_id)
+        if translation:
+            if replace is not None:
+                return replace % translation
+            else:
+                return translation
+        return fallback
 
     def is_geo_locked(self) -> bool:
         return self.geo_lock
@@ -216,30 +218,6 @@ class Kodi:
             'mediatype': item.media_type()
         }
 
-    @staticmethod
-    def select_dialog(title, items):
-        select_dialog = Dialog()
-        selected = select_dialog.select(title, items)
-        if selected != -1:
-            return selected
-        return False
-
-    @staticmethod
-    def get_progress_dialog(title, description=""):
-        progress = DialogProgress()
-        progress.create(title, description)
-        return progress
-
-    @staticmethod
-    def build_meta_description(item):
-        desc = ""
-        meta_desc = item.get_meta_description()
-        for label in meta_desc:
-            desc += "\n[COLOR blue][LIGHT]%s[/LIGHT][/COLOR] %s" % (label, meta_desc[label])
-        if desc != "":
-            desc += "\n\n"
-        return desc
-
     def build_art(self, item) -> dict:
         return {
             'clearlogo': item.get_channel_logo(),
@@ -296,29 +274,6 @@ class Kodi:
         else:
             json_data = [directory_json]
         self.save_json(json_data, target_file)
-
-    @staticmethod
-    def truncate_string(str_value, max_len=400) -> str:
-        if str_value:
-            return str_value[:max_len] + (str_value[max_len:] and ' ...')
-
-    @staticmethod
-    def build_url(url, args) -> str:
-        arg_str = ""
-        for arg in args:
-            if not arg_str:
-                arg_str = "?%s=%s" % (arg, args.get(arg)[0])
-            else:
-                arg_str += "&%s=%s" % (arg, args.get(arg)[0])
-        return "%s%s" % (url, arg_str)
-
-    @staticmethod
-    def get_keyboard_input() -> str:
-        keyboard = Keyboard()
-        keyboard.doModal()
-        if keyboard.isConfirmed():
-            return keyboard.getText()
-        return ""
 
     def remove_file(self, file) -> bool:
         file = "%s/%s" % (self.data_folder, file)
@@ -386,3 +341,54 @@ class Kodi:
     def log(self, msg, msg_type='info'):
         if self.verbose:
             print("[%s][ORFON][KODI] %s" % (msg_type.upper(), msg))
+
+    @staticmethod
+    def execute(command):
+        executebuiltin(command)
+
+    @staticmethod
+    def select_dialog(title, items):
+        select_dialog = Dialog()
+        selected = select_dialog.select(title, items)
+        if selected != -1:
+            return selected
+        return False
+
+    @staticmethod
+    def get_progress_dialog(title, description=""):
+        progress = DialogProgress()
+        progress.create(title, description)
+        return progress
+
+    @staticmethod
+    def build_meta_description(item):
+        desc = ""
+        meta_desc = item.get_meta_description()
+        for label in meta_desc:
+            desc += "\n[COLOR blue][LIGHT]%s[/LIGHT][/COLOR] %s" % (label, meta_desc[label])
+        if desc != "":
+            desc += "\n\n"
+        return desc
+
+    @staticmethod
+    def truncate_string(str_value, max_len=400) -> str:
+        if str_value:
+            return str_value[:max_len] + (str_value[max_len:] and ' ...')
+
+    @staticmethod
+    def build_url(url, args) -> str:
+        arg_str = ""
+        for arg in args:
+            if not arg_str:
+                arg_str = "?%s=%s" % (arg, args.get(arg)[0])
+            else:
+                arg_str += "&%s=%s" % (arg, args.get(arg)[0])
+        return "%s%s" % (url, arg_str)
+
+    @staticmethod
+    def get_keyboard_input() -> str:
+        keyboard = Keyboard()
+        keyboard.doModal()
+        if keyboard.isConfirmed():
+            return keyboard.getText()
+        return ""

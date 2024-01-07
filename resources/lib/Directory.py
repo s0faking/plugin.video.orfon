@@ -3,8 +3,9 @@ from datetime import datetime
 
 
 class Directory:
-    def __init__(self, title, description, link, content_id="", content_type="", thumbnail="", backdrop="", poster="", source={}, verbose=True):
+    def __init__(self, title, description, link, content_id="", content_type="", thumbnail="", backdrop="", poster="", source={}, verbose=True, translator=None):
         self.verbose = verbose
+        self.translator = translator
         self.title = title
         if description:
             self.description = description.strip()
@@ -29,21 +30,21 @@ class Directory:
             restart_url = self.get_restart()
             if restart_url:
                 context_menu_items.append({
-                    'title': 'Restart',
+                    'title': self.translate_string(30139, 'Restart'),
                     'url': "restart/%s" % self.source.get('id'),
                     'type': 'run'
                 })
 
         if self.type() == 'episode':
             context_menu_items.append({
-                'title': 'All Episodes',
+                'title': self.translate_string(30140, 'All episodes'),
                 'url': "episode/%s/more" % self.source.get('id'),
                 'type': 'update'
             })
 
         if self.type() == 'segment' and self.source.get('episode_id'):
             context_menu_items.append({
-                'title': 'All Episodes',
+                'title': self.translate_string(30140, 'All episodes'),
                 'url': "episode/%s/more" % self.source.get('episode_id'),
                 'type': 'update'
             })
@@ -56,6 +57,12 @@ class Directory:
 
     def get_context_menu(self) -> list:
         return self.context_menu
+
+    def translate_string(self, translation_id, fallback, replace=None):
+        if self.translator:
+            return self.translator.get_translation(translation_id, fallback, replace)
+        else:
+            return fallback
 
     @staticmethod
     def build_meta(item) -> dict:
@@ -158,8 +165,6 @@ class Directory:
     def label2(self) -> str:
         if self.meta.get('sub_headline') and self.meta.get('sub_headline') != self.title and self.meta.get('sub_headline') not in self.title:
             return self.meta.get('sub_headline')
-        if self.is_pvr_mode():
-            return "HELLO LIVESTREAM"
 
     def is_livestream(self) -> bool:
         return self.type() == 'timeshift' or self.type() == 'livestream'
@@ -241,13 +246,13 @@ class Directory:
         meta_description = {}
         if not self.is_pvr_mode():
             if self.get_episodes() > 1:
-                meta_description['Episodes'] = self.get_episodes()
+                meta_description[self.translate_string(30141, 'Episodes')] = self.get_episodes()
             if self.get_channel():
-                meta_description['Channel'] = self.get_channel()
+                meta_description[self.translate_string(30142, 'Channel')] = self.get_channel()
             if self.is_livestream() and self.get_stream_runtime():
-                meta_description['Livestream'] = self.get_stream_runtime()
+                meta_description[self.translate_string(30113, 'Livestream')] = self.get_stream_runtime()
                 if not self.livestream_active():
-                    meta_description['Start in'] = "%d min" % self.get_stream_start_delta()
+                    meta_description[self.translate_string(30114, 'Starts in')] = "%d min" % self.get_stream_start_delta()
             if 'episode_title' in self.get_source() and 'sub_headline' in self.get_source():
                 meta_description[self.meta.get('sub_headline')] = ""
 

@@ -13,7 +13,7 @@ kodi_worker = Kodi(route_plugin, verbose=verbose)
 if not sys.argv[0].startswith('plugin://'+kodi_worker.addon_id+'/dialog'):
     channel_map, channel_map_cached = kodi_worker.get_cached_file(channel_map_file)
     settings, settings_cached = kodi_worker.get_cached_file(settings_file)
-    api = OrfOn(channel_map=channel_map, settings=settings, verbose=verbose, useragent=kodi_worker.useragent)
+    api = OrfOn(channel_map=channel_map, settings=settings, verbose=verbose, useragent=kodi_worker.useragent, translator=kodi_worker)
     api.set_pager_limit(kodi_worker.pager_limit)
 
     kodi_worker.set_geo_lock(api.is_geo_locked())
@@ -32,7 +32,7 @@ if not sys.argv[0].startswith('plugin://'+kodi_worker.addon_id+'/dialog'):
 def get_main_menu():
     kodi_worker.log("Loading Main Menu", 'route')
     if kodi_worker.is_geo_locked():
-        kodi_worker.render(Directory('[COLOR red]*** Geo Lock aktiv ***[/COLOR]', 'Einige Inhalte sind in Ihren Land nicht verfügbar', '/'))
+        kodi_worker.render(Directory(kodi_worker.translate_string(30128, 'Geo lock active', ' [COLOR red]*** %s ***[/COLOR]'), kodi_worker.translate_string(30129, 'Some content may not be available in your country'), '/'))
     index_directories = api.get_main_menu()
     for index_directory in index_directories:
         kodi_worker.render(index_directory)
@@ -135,7 +135,7 @@ def get_pvr_livestream(channelreel):
 def get_schedule_selection():
     kodi_worker.log("Opening Schedule Selection", 'route')
     items, filters = api.get_schedule_dates()
-    selected = kodi_worker.select_dialog('Select a date', items)
+    selected = kodi_worker.select_dialog(kodi_worker.get_translation(30130, 'Select a date'), items)
     api.log(selected)
     if selected is not False and selected > -1:
         api.log("Loading %s Schedule" % filters[selected])
@@ -163,7 +163,7 @@ def get_schedule(scheduledate):
 def get_search():
     kodi_worker.log("Opening Search History", 'route')
     search_link = '/search/query'
-    search_dir = Directory('Enter search ...', "", search_link)
+    search_dir = Directory(kodi_worker.get_translation(30131, 'Enter search ...', '%s ...'), "", search_link)
     kodi_worker.render(search_dir)
     directories = kodi_worker.get_stored_directories(search_history_file)
     for directory in directories:
@@ -205,17 +205,17 @@ def get_search_dialog():
 
 @route_plugin.route('/dialog/clear_search_history')
 def clear_search_history():
-    dialog = kodi_worker.get_progress_dialog('Clearing search history')
-    dialog.update(0, 'Clearing history ...')
+    dialog = kodi_worker.get_progress_dialog(kodi_worker.get_translation(30132, 'Clearing search history'))
+    dialog.update(0, kodi_worker.get_translation(30133, 'Clearing ...', '%s ...'))
     kodi_worker.clear_stored_directories(search_history_file)
-    dialog.update(100, 'Done')
+    dialog.update(100, kodi_worker.get_translation(30134, 'Done'))
     dialog.close()
 
 
 @route_plugin.route('/dialog/reload_cache')
 def clear_cache():
     dialog = kodi_worker.get_progress_dialog('Reloading cache')
-    dialog.update(0, 'Reloading cache ...')
+    dialog.update(0, kodi_worker.get_translation(30136, 'Reloading cache ...', '%s ...'))
     kodi_worker.log("Reloading channel/settings cache", 'route')
     tmp_channel_map, tmp_channel_map_cached = kodi_worker.get_cached_file(channel_map_file)
     tmp_settings, tmp_settings_cached = kodi_worker.get_cached_file(settings_file)
@@ -224,13 +224,13 @@ def clear_cache():
     tmp_api = OrfOn(channel_map=tmp_channel_map, settings=tmp_settings, verbose=verbose, useragent=kodi_worker.useragent)
     tmp_api.channel_map = False
     tmp_api.settings = False
-    dialog.update(33, 'Loading channels')
+    dialog.update(33, kodi_worker.get_translation(30137, 'Loading channels'))
     tmp_channel_map = tmp_api.get_channel_map()
     kodi_worker.save_json(tmp_channel_map, channel_map_file)
-    dialog.update(66, 'Loading settings')
+    dialog.update(66, kodi_worker.get_translation(30138, 'Loading settings'))
     tmp_settings = tmp_api.get_settings()
     kodi_worker.save_json(tmp_settings, settings_file)
-    dialog.update(100, 'Done')
+    dialog.update(100, kodi_worker.get_translation(30134, 'Done'))
     dialog.close()
 
 

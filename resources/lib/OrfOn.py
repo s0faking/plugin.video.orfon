@@ -9,6 +9,7 @@ except ModuleNotFoundError:
 from urllib.request import Request as urllib_Request
 from urllib.request import urlopen as urllib_urlopen
 from urllib.error import HTTPError as urllib_HTTPError
+from urllib.error import URLError as urllib_URLError
 from urllib.parse import urlparse, urlencode, quote_plus
 
 
@@ -36,12 +37,6 @@ class OrfOn:
     channel_map = False
     settings = False
 
-    type_map = {
-        'highlights': 'Highlights',
-        'genres': 'Kategorien',
-        'orflive': 'Livestream'
-    }
-
     supported_delivery = 'dash'
     quality_definitions = {
         'UHD': {
@@ -62,7 +57,7 @@ class OrfOn:
     }
     drm_widewine_brand = '13f2e056-53fe-4469-ba6d-999970dbe549'
 
-    def __init__(self, channel_map=False, settings=False, verbose=False, useragent=False):
+    def __init__(self, channel_map=None, settings=None, verbose=False, useragent=False, translator=False):
         self.verbose = verbose
         if useragent:
             self.useragent = useragent
@@ -78,6 +73,13 @@ class OrfOn:
         else:
             self.settings = settings
 
+        self.translator = translator
+        self.type_map = {
+            'highlights': self.translate_string(30115, 'Highlights'),
+            'genres': self.translate_string(30116, 'Categories'),
+            'orflive': self.translate_string(30113, 'Livestream')
+        }
+
     def is_geo_locked(self):
         headers = self.get_headers()
         url = self.geo_lock_url
@@ -87,7 +89,8 @@ class OrfOn:
         except urllib_HTTPError as error:
             self.log('%s (%s)' % (error, url), 'error')
             return False
-        except:
+        except urllib_URLError as error:
+            self.log('%s (%s)' % (error, url), 'error')
             return False
 
         try:
@@ -97,8 +100,15 @@ class OrfOn:
             if match:
                 is_allowed = match.group(1)
                 return is_allowed.lower() != 'true'
-        except:
+        except re.error as error:
+            self.log('%s (%s)' % (error, url), 'error')
             return False
+
+    def translate_string(self, translation_id, fallback, replace=None):
+        if self.translator:
+            return self.translator.get_translation(translation_id, fallback, replace)
+        else:
+            return fallback
 
     def set_pager_limit(self, limit):
         self.api_pager_limit = limit
@@ -135,11 +145,11 @@ class OrfOn:
         return json.loads(data)
 
     def get_main_menu(self) -> list:
-        items = [Directory('Startseite', '', self.api_endpoint_home, '', 'home'),
-                 Directory('Sendung verpasst', '', '/schedule', '', 'schedule'),
-                 Directory('Sendungen', '', self.api_endpoint_shows % self.api_pager_limit, '', 'shows'),
-                 Directory('Live', '', self.api_endpoint_livestreams, '', 'live'),
-                 Directory('Suche', '', '/search', '', 'search')]
+        items = [Directory(self.translate_string(30110, 'Frontpage'), '', self.api_endpoint_home, '', 'home'),
+                 Directory(self.translate_string(30111, 'Schedule'), '', '/schedule', '', 'schedule'),
+                 Directory(self.translate_string(30112, 'Shows'), '', self.api_endpoint_shows % self.api_pager_limit, '', 'shows'),
+                 Directory(self.translate_string(30113, 'Livestream'), '', self.api_endpoint_livestreams, '', 'live'),
+                 Directory(self.translate_string(30114, 'Search'), '', '/search', '', 'search')]
         items += self.get_frontpage(lanes=False)
         return items
 
@@ -196,7 +206,7 @@ class OrfOn:
         for day in range(replay_days):
             days_before = (current_date - timedelta(days=day))
             isodate = days_before.isoformat()
-            prettydate = days_before.strftime("%a, %d.%m.%Y")
+            prettydate = days_before.strftime("%A, %d.%m.%Y")
             day_items.append(prettydate)
             filter_items.append(isodate)
         return day_items, filter_items
@@ -253,21 +263,21 @@ class OrfOn:
         if 'search' in data:
             if 'episodes' in data['search']:
                 if data['search']['episodes']['total'] > 0:
-                    title = ' - Alle Episoden Ergebnisse (%d) -' % data['search']['episodes']['total']
+                    title = ' - ' + self.translate_string(30124, 'All episode results') + ' (%d) -' % data['search']['episodes']['total']
                     desc = ""
                     link = self.api_endpoint_search_partial % ('episodes', query, self.api_pager_limit)
                     results.append(Directory(title, desc, link))
 
             if 'segments' in data['search']:
                 if data['search']['segments']['total'] > 0:
-                    title = ' - Alle Kapitel Ergebnisse (%d) -' % data['search']['segments']['total']
+                    title = ' - ' + self.translate_string(30125, 'All chapter results') + ' (%d) -' % data['search']['segments']['total']
                     desc = ""
                     link = self.api_endpoint_search_partial % ('segments', query, self.api_pager_limit)
                     results.append(Directory(title, desc, link))
 
             if 'history' in data['search']:
                 if data['search']['history']['total'] > 0:
-                    title = ' - Alle History Ergebnisse (%d) -' % data['search']['history']['total']
+                    title = ' - ' + self.translate_string(30126, 'All history results') + ' (%d) -' % data['search']['history']['total']
                     desc = ""
                     link = self.api_endpoint_search_partial % ('history', query, self.api_pager_limit)
                     results.append(Directory(title, desc, link))
@@ -295,7 +305,7 @@ class OrfOn:
                 results.append(self.build(item))
         if 'next' in data and data['next'] and data['next'] != "":
             next_page_url = self.clean_url(data['next'])
-            results.append(Directory('Weiter', '', next_page_url, '', 'pager'))
+            results.append(Directory(self.translate_string(30127, 'Next page', ' > %s'), '', next_page_url, '', 'pager'))
         return results
 
     def get_url(self, url) -> list:
@@ -342,7 +352,7 @@ class OrfOn:
             request = urllib_urlopen(urllib_Request(restart_url, headers=headers))
         except urllib_HTTPError as error:
             self.log("%s (%s)" % (error, restart_url), 'error')
-            return {}
+            return ""
 
         data = request.read()
         restart_data = json.loads(data)
@@ -427,13 +437,14 @@ class OrfOn:
                     content.append(result)
 
         elif 'page' in data and '_items' in data:
+            item = {}
             for item in data['_items']:
                 result = self.build(item)
                 if result:
                     content.append(result)
             if 'next' in item['_links']:
                 next_page_url = self.clean_url(item['_links']['next']['href'])
-                content.append(Directory('Weiter', '', next_page_url, '', 'pager'))
+                content.append(Directory(self.translate_string(30127, 'Next page', ' > %s'), '', next_page_url, '', 'pager'))
 
         elif 'page' in data and '_embedded' in data and 'items' in data['_embedded']:
             for item in data['_embedded']['items']:
@@ -443,7 +454,7 @@ class OrfOn:
 
             if 'next' in data['_links']:
                 next_page_url = self.clean_url(data['_links']['next']['href'])
-                content.append(Directory('Weiter', '', next_page_url, '', 'pager'))
+                content.append(Directory(self.translate_string(30127, 'Next page', ' > %s'), '', next_page_url, '', 'pager'))
 
         elif 'history_highlights' in data:
             for item in data['history_highlights']:
@@ -534,27 +545,23 @@ class OrfOn:
         else:
             link = self.clean_url(item['_links']['self'])
 
-        #playable = False
-        #if 'online_episode_count' in item and item['online_episode_count'] < 2:
-        #    playable = True
-
         if item_type == 'genre':
             link = "%s/profiles?limit=%d" % (link, self.api_pager_limit)
-            return Directory(item['title'], description, link, item['id'], item['type'], banner, backdrop, poster, item)
+            return Directory(item['title'], description, link, item['id'], item['type'], banner, backdrop, poster, item, translator=self.translator)
         elif item_id == 'lane':
-            return Directory(item['title'], description, link, item['id'], item['type'], banner, backdrop, poster, item)
+            return Directory(item['title'], description, link, item['id'], item['type'], banner, backdrop, poster, item, translator=self.translator)
         elif item_id == 'highlights':
-            return Directory(self.type_map['highlights'], description, link, item['id'], item['type'], banner, backdrop, poster, item)
+            return Directory(self.type_map['highlights'], description, link, item['id'], item['type'], banner, backdrop, poster, item, translator=self.translator)
         elif item_id == 'genres':
-            return Directory(self.type_map['genres'], description, link, item['id'], item['type'], banner, backdrop, poster, item)
+            return Directory(self.type_map['genres'], description, link, item['id'], item['type'], banner, backdrop, poster, item, translator=self.translator)
         elif item_id == 'orflive':
             self.log("Skipping Livestream from Orf On because its broken on the beta")
             # This is broken on the beta version
             # return Directory(self.type_map['orflive'], description, link, item['id'], item['type'], banner, backdrop, poster, item)
         elif 'title' in item and item['title'] and 'type' in item:
-            return Directory(item['title'], description, link, item['id'], item['type'], banner, backdrop, poster, item)
+            return Directory(item['title'], description, link, item['id'], item['type'], banner, backdrop, poster, item, translator=self.translator)
         elif 'title' in item and item['title'] and 'children_count' in item:
-            return Directory(item['title'], description, link, item['id'], 'directory', banner, backdrop, poster, item)
+            return Directory(item['title'], description, link, item['id'], 'directory', banner, backdrop, poster, item, translator=self.translator)
 
     def build_video(self, item, link) -> Directory:
         self.log("Building Video %s (%s)" % (item['title'], item['id']))
@@ -572,7 +579,7 @@ class OrfOn:
         video_id = item['id']
         banner, backdrop, poster = self.get_images(item)
         item['channel_meta'] = self.channel_map
-        return Directory(title, description, link, video_id, video_type, banner, backdrop, poster, item)
+        return Directory(title, description, link, video_id, video_type, banner, backdrop, poster, item, translator=self.translator)
 
     def clean_url(self, url):
         return url.replace(self.api_base, "")

@@ -16,11 +16,11 @@ Current Features
 
 Todos
 ----------------
-* Subtitles
-* Add Settings
-* Add option to show related content
-* Add a main menu entry for latest uploads
-* Kodi translation still missing
+- [X] Subtitles
+- [X] Add Settings
+- [ ] Add option to show related content
+- [ ] Add a main menu entry for latest uploads
+- [X] Kodi translation still missing
 
 
 Known Issues

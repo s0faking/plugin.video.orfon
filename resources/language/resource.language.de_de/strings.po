@@ -51,3 +51,107 @@ msgstr "Cache Gültigkeit (Tage)"
 msgctxt "#30109"
 msgid "Clear search history"
 msgstr "Suchverlauf löschen"
+
+msgctxt "#30110"
+msgid "Frontpage"
+msgstr "Startseite"
+
+msgctxt "#30111"
+msgid "Schedule"
+msgstr "Sendung verpasst"
+
+msgctxt "#30112"
+msgid "Shows"
+msgstr "Sendungen"
+
+msgctxt "#30113"
+msgid "Livestream"
+msgstr "Livestream"
+
+msgctxt "#30114"
+msgid "Search"
+msgstr "Suche"
+
+msgctxt "#30115"
+msgid "Highlights"
+msgstr "Highlights"
+
+msgctxt "#30116"
+msgid "Categories"
+msgstr "Kategorien"
+
+msgctxt "#30124"
+msgid "All episode results"
+msgstr "Alle Episoden Ergebnisse"
+
+msgctxt "#30125"
+msgid "All chapter results"
+msgstr "Alle Kapitel Ergebnisse"
+
+msgctxt "#30126"
+msgid "All history results"
+msgstr "Alle ORF History Ergebnisse"
+
+msgctxt "#30127"
+msgid "Next page"
+msgstr "Nächste Seite"
+
+msgctxt "#30128"
+msgid "Geo lock active"
+msgstr "Geo Lock aktiv"
+
+msgctxt "#30129"
+msgid "Some content may not be available in your country"
+msgstr "Einige Inhalte sind in Ihrem Land unter Umständen nicht verfügbar"
+
+msgctxt "#30130"
+msgid "Select a date"
+msgstr "Datum auswählen"
+
+msgctxt "#30131"
+msgid "Enter search"
+msgstr "Suchbegriff eingeben"
+
+msgctxt "#30132"
+msgid "Clearing search history"
+msgstr "Suchverlauf löschen"
+
+msgctxt "#30133"
+msgid "Clearing"
+msgstr "Wird gelöscht"
+
+msgctxt "#30134"
+msgid "Done"
+msgstr "Fertig"
+
+msgctxt "#30136"
+msgid "Reloading cache"
+msgstr "Lade Cache neu"
+
+msgctxt "#30137"
+msgid "Loading channels"
+msgstr "Sender werden geladen"
+
+msgctxt "#30138"
+msgid "Loading settings"
+msgstr "Einstellungen werden geladen"
+
+msgctxt "#30139"
+msgid "Restart"
+msgstr "Restart"
+
+msgctxt "#30140"
+msgid "All episodes"
+msgstr "Alle Folgen"
+
+msgctxt "#30141"
+msgid "Episodes"
+msgstr "Folgen"
+
+msgctxt "#30142"
+msgid "Channel"
+msgstr "Sender"
+
+msgctxt "#30143"
+msgid "Starts in"
+msgstr "Startet in"
