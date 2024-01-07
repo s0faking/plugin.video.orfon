@@ -305,7 +305,7 @@ class OrfOn:
                 results.append(self.build(item))
         if 'next' in data and data['next'] and data['next'] != "":
             next_page_url = self.clean_url(data['next'])
-            results.append(Directory(self.translate_string(30127, 'Next page', ' > %s'), '', next_page_url, '', 'pager'))
+            results.append(Directory(self.translate_string(30127, 'Next page', '[COLOR blue][B]%s[/B][/COLOR]'), '', next_page_url, '', 'pager'))
         return results
 
     def get_url(self, url) -> list:
@@ -444,7 +444,7 @@ class OrfOn:
                     content.append(result)
             if 'next' in item['_links']:
                 next_page_url = self.clean_url(item['_links']['next']['href'])
-                content.append(Directory(self.translate_string(30127, 'Next page', ' > %s'), '', next_page_url, '', 'pager'))
+                content.append(Directory(self.translate_string(30127, 'Next page', '[COLOR blue][B]%s[/B][/COLOR]'), '', next_page_url, '', 'pager'))
 
         elif 'page' in data and '_embedded' in data and 'items' in data['_embedded']:
             for item in data['_embedded']['items']:
@@ -454,7 +454,7 @@ class OrfOn:
 
             if 'next' in data['_links']:
                 next_page_url = self.clean_url(data['_links']['next']['href'])
-                content.append(Directory(self.translate_string(30127, 'Next page', ' > %s'), '', next_page_url, '', 'pager'))
+                content.append(Directory(self.translate_string(30127, 'Next page', '[COLOR blue][B]%s[/B][/COLOR]'), '', next_page_url, '', 'pager'))
 
         elif 'history_highlights' in data:
             for item in data['history_highlights']:
