@@ -311,13 +311,14 @@ class Directory:
         return 1
 
     def get_cast(self):
-        besetzung_pattern = r'Besetzung:(.*?)(?=\r\n|$)'
-        darsteller_pattern = r'Hauptdarsteller|Mit|Besetzung(.*?)$'
-        shady_pattern = r'Mit (.*?)(?=\r\n|$)'
+        besetzung_pattern = r'Besetzung:\s?(.*?)(?=\r\n|$)'
+        darsteller_alt_pattern = r'Hauptdarsteller:\s?(.*?)(?=\r\n|$)'
+        darsteller_pattern = r'Hauptdarsteller|Mit|Besetzung:\s?(.*?)$'
+        shady_pattern = r'Mit(.*?)(?=\r\n|$)'
         tuple_pattern = r'(?P<name>[\w\s]+)\s*\((?P<name_in_parentheses>[\w\s\W]+)\)'
         cast = []
         try:
-            if 'Besetzung:' in self.description:
+            if 'Besetzung: ' in self.description :
                 matches = re.findall(besetzung_pattern, self.description, re.DOTALL)
                 for match in matches:
                     actors = match.strip().split(', ')
@@ -325,10 +326,25 @@ class Directory:
                         if actor != '':
                             match = re.match(tuple_pattern, actor)
                             if match:
-                                cast.append((match.group('name'), match.group('name_in_parentheses')))
+                                cast.append((match.group('name').strip(), match.group('name_in_parentheses').strip()))
                             else:
                                 cast.append(actor)
-            if 'Hauptdarsteller:' in self.description or 'Mit:' in self.description or 'Besetzung:\r\n' in self.description:
+                if len(cast) > 0:
+                    return cast
+            if 'Hauptdarsteller: ' in self.description:
+                matches = re.findall(darsteller_alt_pattern, self.description, re.DOTALL)
+                for match in matches:
+                    actors = match.strip().split(', ')
+                    for actor in actors:
+                        if actor != '':
+                            match = re.match(tuple_pattern, actor)
+                            if match:
+                                cast.append((match.group('name').strip(), match.group('name_in_parentheses').strip()))
+                            else:
+                                cast.append(actor)
+                if len(cast) > 0:
+                    return cast
+            if 'Hauptdarsteller:' in self.description or 'Mit:' in self.description or 'Besetzung:' in self.description:
                 matches = re.findall(darsteller_pattern, self.description, re.DOTALL)
                 for match in matches:
                     actors = match.strip().split('\r\n')
@@ -336,7 +352,9 @@ class Directory:
                         if actor != '':
                             match = re.match(tuple_pattern, actor)
                             if match:
-                                cast.append((match.group('name'), match.group('name_in_parentheses')))
+                                cast.append((match.group('name').strip(), match.group('name_in_parentheses').strip()))
+                if len(cast) > 0:
+                    return cast
             if 'Mit ' in self.description:
                 matches = re.findall(shady_pattern, self.description, re.DOTALL)
                 for match in matches:
@@ -345,7 +363,9 @@ class Directory:
                         if actor != '':
                             match = re.match(tuple_pattern, actor)
                             if match:
-                                cast.append((match.group('name'), match.group('name_in_parentheses')))
+                                cast.append((match.group('name').strip(), match.group('name_in_parentheses').strip()))
+                if len(cast) > 0:
+                    return cast
             return cast
         except re.error as e:
             return cast
