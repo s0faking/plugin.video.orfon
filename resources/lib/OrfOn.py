@@ -181,13 +181,13 @@ class OrfOn:
             if 'color_logo' in channel['_links']:
                 media_url = self.clean_url(channel['_links']['color_logo']['href'])
                 logo_data = self.auth_request(media_url)
-                color_logo = logo_data['public_urls']['reference']['url']
+                color_logo = logo_data['public_urls']['tiny']['url']
             else:
                 color_logo = ""
             if 'black_and_white_logo' in channel['_links']:
                 media_url = self.clean_url(channel['_links']['black_and_white_logo']['href'])
                 logo_data = self.auth_request(media_url)
-                logo = logo_data['public_urls']['reference']['url']
+                logo = logo_data['public_urls']['tiny']['url']
             else:
                 logo = ""
             channel_map[channel_id] = {

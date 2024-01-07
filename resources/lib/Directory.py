@@ -72,7 +72,11 @@ class Directory:
 
         # Show Meta
         if 'genre_title' in item and item['genre_title'] is not None:
-            meta['genre'] = item['genre_title']
+            if item['genre_title'] == 'Film & Serie' and 'sub_headline' in item and item['sub_headline'] is not None:
+                meta['genre'] = item['sub_headline']
+            else:
+                meta['genre'] = item['genre_title']
+
         if 'genre_id' in item and item['genre_id'] is not None:
             meta['genre_id'] = item['genre_id']
         if 'production_year' in item and item['production_year'] is not None:
@@ -306,6 +310,46 @@ class Directory:
             return int(self.meta.get('episodes'))
         return 1
 
+    def get_cast(self):
+        besetzung_pattern = r'Besetzung:(.*?)(?=\r\n|$)'
+        darsteller_pattern = r'Hauptdarsteller|Mit|Besetzung(.*?)$'
+        shady_pattern = r'Mit (.*?)(?=\r\n|$)'
+        tuple_pattern = r'(?P<name>[\w\s]+)\s*\((?P<name_in_parentheses>[\w\s\W]+)\)'
+        cast = []
+        try:
+            if 'Besetzung:' in self.description:
+                matches = re.findall(besetzung_pattern, self.description, re.DOTALL)
+                for match in matches:
+                    actors = match.strip().split(', ')
+                    for actor in actors:
+                        if actor != '':
+                            match = re.match(tuple_pattern, actor)
+                            if match:
+                                cast.append((match.group('name'), match.group('name_in_parentheses')))
+                            else:
+                                cast.append(actor)
+            if 'Hauptdarsteller:' in self.description or 'Mit:' in self.description or 'Besetzung:\r\n' in self.description:
+                matches = re.findall(darsteller_pattern, self.description, re.DOTALL)
+                for match in matches:
+                    actors = match.strip().split('\r\n')
+                    for actor in actors:
+                        if actor != '':
+                            match = re.match(tuple_pattern, actor)
+                            if match:
+                                cast.append((match.group('name'), match.group('name_in_parentheses')))
+            if 'Mit ' in self.description:
+                matches = re.findall(shady_pattern, self.description, re.DOTALL)
+                for match in matches:
+                    actors = match.strip().split(', ')
+                    for actor in actors:
+                        if actor != '':
+                            match = re.match(tuple_pattern, actor)
+                            if match:
+                                cast.append((match.group('name'), match.group('name_in_parentheses')))
+            return cast
+        except re.error as e:
+            return cast
+
     def url(self) -> str:
         return self.link
 
@@ -327,6 +371,10 @@ class Directory:
 
     def media_type(self) -> str:
         contenttype = self.type()
+        if self.label2() == 'Fernsehfilm':
+            return 'movie'
+        if self.get_duration() is not None and self.get_duration() > 60*60:
+            return 'movie'
         if contenttype == 'lane':
             return 'video'
         if contenttype == 'episode':

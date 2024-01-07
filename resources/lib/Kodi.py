@@ -209,18 +209,21 @@ class Kodi:
             'title': item.label(),
             'originaltitle': item.label(),
             'sorttitle': item.label(),
+            'tvshowtitle': item.label(),
             'plot': generated_description,
             'plotoutline': generated_outline,
             'genre': item.genre(),
+            'tag': item.genre(),
             'aired': item.date(),
             'country': item.country(),
             'year': item.year(),
-            'mediatype': item.media_type()
+            'mediatype': item.media_type(),
+            'cast': item.get_cast()
         }
 
     def build_art(self, item) -> dict:
         return {
-            'clearlogo': item.get_channel_logo(),
+            # 'clearlogo': item.get_channel_logo(),
             'thumb': item.thumbnail or self.get_media('icon.jpg'),
             'poster': item.poster or self.get_media('poster.jpg'),
             'fanart': item.backdrop or self.get_media('fanart.jpg'),
