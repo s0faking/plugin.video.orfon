@@ -24,6 +24,7 @@ def translate(translation_id):
 
 class Kodi:
     version_regex = r"plugin:\/\/([^\/]+)"
+    print(sys.argv)
     addon_id = re.search(version_regex, sys.argv[0]).groups()[0]
     addon = Addon()
     data_folder = xbmcvfs.translatePath("special://profile/addon_data/%s" % addon_id)
@@ -47,6 +48,7 @@ class Kodi:
         self.hide_sign_language_content = self.addon.getSetting('hideOEGS') == 'true'
         self.useragent = self.addon.getSetting('userAgent')
         self.pager_limit = int(self.addon.getSetting('pagerLimit'))
+        self.max_cache_age = int(self.addon.getSetting('maxCacheAge'))*60*60*24
 
     def init_storage(self):
         if not os.path.exists(self.data_folder):
@@ -223,6 +225,12 @@ class Kodi:
         return False
 
     @staticmethod
+    def get_progress_dialog(title, description=""):
+        progress = DialogProgress()
+        progress.create(title, description)
+        return progress
+
+    @staticmethod
     def build_meta_description(item):
         desc = ""
         meta_desc = item.get_meta_description()
@@ -250,7 +258,6 @@ class Kodi:
     def list_callback(self, content_type="movies", sort=False) -> None:
         if content_type:
             setContent(self.plugin.handle, content_type)
-            # executebuiltin("Container.SetViewMode(51)")
         if sort:
             addSortMethod(int(sys.argv[1]), SORT_METHOD_DATE)
             addSortMethod(int(sys.argv[1]), SORT_METHOD_VIDEO_TITLE)
@@ -258,6 +265,10 @@ class Kodi:
 
     def get_media(self, filename):
         return os.path.join(self.resource_path, filename)
+
+    def clear_stored_directories(self, storage_key):
+        target_file = '%s.json' % storage_key
+        self.remove_file(target_file)
 
     def get_stored_directories(self, storage_key):
         target_file = '%s.json' % storage_key
@@ -321,7 +332,8 @@ class Kodi:
     def get_cached_file(self, file) -> tuple:
         channel_map_age = self.get_file_age(file)
 
-        if self.max_cache_age > channel_map_age > 0:
+        if self.max_cache_age > channel_map_age >= 0:
+            self.log("Channel Cache is valid. File age lower than %s seconds (%d seconds)" % (self.max_cache_age, channel_map_age))
             data = self.load_json(file)
             if not len(data):
                 cached = False
@@ -338,12 +350,12 @@ class Kodi:
         file = "%s/%s" % (self.data_folder, file)
         try:
             st = os.stat(file)
-            age_seconds = int((time.time() - st.st_mtime)/60)
+            age_seconds = time.time() - st.st_mtime
             self.log("Cache Age %d seconds" % age_seconds)
             return age_seconds
         except FileNotFoundError:
             self.log("File %s could not be found" % file, 'warning')
-            return 0
+            return -1
 
     def save_json(self, json_data, file) -> bool:
         file = "%s/%s" % (self.data_folder, file)

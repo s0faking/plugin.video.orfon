@@ -1,29 +1,31 @@
+import sys
+
 from Kodi import *
 import routing
 
 verbose = True
+settings_file = 'settings.json'
+channel_map_file = 'channels.json'
+search_history_file = 'search_history'
 
 route_plugin = routing.Plugin()
 kodi_worker = Kodi(route_plugin, verbose=verbose)
+if not sys.argv[0].startswith('plugin://'+kodi_worker.addon_id+'/dialog'):
+    channel_map, channel_map_cached = kodi_worker.get_cached_file(channel_map_file)
+    settings, settings_cached = kodi_worker.get_cached_file(settings_file)
+    api = OrfOn(channel_map=channel_map, settings=settings, verbose=verbose, useragent=kodi_worker.useragent)
+    api.set_pager_limit(kodi_worker.pager_limit)
 
-# Load Cached Channel Map
-settings_file = 'settings.json'
-channel_map_file = 'channels.json'
-channel_map, channel_map_cached = kodi_worker.get_cached_file(channel_map_file)
-settings, settings_cached = kodi_worker.get_cached_file(settings_file)
-api = OrfOn(channel_map=channel_map, settings=settings, verbose=verbose, useragent=kodi_worker.useragent)
-api.set_pager_limit(kodi_worker.pager_limit)
+    kodi_worker.set_geo_lock(api.is_geo_locked())
+    channel_map = api.get_channel_map()
+    settings = api.get_settings()
 
-kodi_worker.set_geo_lock(api.is_geo_locked())
-channel_map = api.get_channel_map()
-settings = api.get_settings()
+    # Only overwrite if cache was invalidated
+    if not channel_map_cached:
+        kodi_worker.save_json(channel_map, channel_map_file)
 
-# Only overwrite if cache was invalidated
-if not channel_map_cached:
-    kodi_worker.save_json(channel_map, channel_map_file)
-
-if not settings_cached:
-    kodi_worker.save_json(settings, settings_file)
+    if not settings_cached:
+        kodi_worker.save_json(settings, settings_file)
 
 
 @route_plugin.route('/')
@@ -163,7 +165,7 @@ def get_search():
     search_link = '/search/query'
     search_dir = Directory('Enter search ...', "", search_link)
     kodi_worker.render(search_dir)
-    directories = kodi_worker.get_stored_directories('search_history')
+    directories = kodi_worker.get_stored_directories(search_history_file)
     for directory in directories:
         kodi_worker.render(directory)
     kodi_worker.list_callback()
@@ -199,6 +201,37 @@ def get_search_dialog():
         error_url = '/search'
         target_url = kodi_worker.plugin.url_for_path(error_url)
     kodi_worker.execute('Container.Update(%s, replace)' % target_url)
+
+
+@route_plugin.route('/dialog/clear_search_history')
+def clear_search_history():
+    dialog = kodi_worker.get_progress_dialog('Clearing search history')
+    dialog.update(0, 'Clearing history ...')
+    kodi_worker.clear_stored_directories(search_history_file)
+    dialog.update(100, 'Done')
+    dialog.close()
+
+
+@route_plugin.route('/dialog/reload_cache')
+def clear_cache():
+    dialog = kodi_worker.get_progress_dialog('Reloading cache')
+    dialog.update(0, 'Reloading cache ...')
+    kodi_worker.log("Reloading channel/settings cache", 'route')
+    tmp_channel_map, tmp_channel_map_cached = kodi_worker.get_cached_file(channel_map_file)
+    tmp_settings, tmp_settings_cached = kodi_worker.get_cached_file(settings_file)
+    kodi_worker.remove_file(settings_file)
+    kodi_worker.remove_file(channel_map_file)
+    tmp_api = OrfOn(channel_map=tmp_channel_map, settings=tmp_settings, verbose=verbose, useragent=kodi_worker.useragent)
+    tmp_api.channel_map = False
+    tmp_api.settings = False
+    dialog.update(33, 'Loading channels')
+    tmp_channel_map = tmp_api.get_channel_map()
+    kodi_worker.save_json(tmp_channel_map, channel_map_file)
+    dialog.update(66, 'Loading settings')
+    tmp_settings = tmp_api.get_settings()
+    kodi_worker.save_json(tmp_settings, settings_file)
+    dialog.update(100, 'Done')
+    dialog.close()
 
 
 @route_plugin.route('<path:url>')

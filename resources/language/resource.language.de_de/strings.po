@@ -35,3 +35,19 @@ msgstr "Audiodeskription Inhalte ausblenden"
 msgctxt "#30105"
 msgid "Items per page"
 msgstr "Inhalte pro Seite"
+
+msgctxt "#30106"
+msgid "Cache"
+msgstr "Cache"
+
+msgctxt "#30107"
+msgid "Reload channel/settings Cache"
+msgstr "Sender/Konfigurations Cache neu laden"
+
+msgctxt "#30108"
+msgid "Cache validity (days)"
+msgstr "Cache Gültigkeit (Tage)"
+
+msgctxt "#30109"
+msgid "Clear search history"
+msgstr "Suchverlauf löschen"

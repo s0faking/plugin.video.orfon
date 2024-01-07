@@ -35,3 +35,19 @@ msgstr ""
 msgctxt "#30105"
 msgid "Items per page"
 msgstr ""
+
+msgctxt "#30106"
+msgid "Cache"
+msgstr ""
+
+msgctxt "#30107"
+msgid "Reload channel/settings Cache"
+msgstr ""
+
+msgctxt "#30108"
+msgid "Cache validity (days)"
+msgstr ""
+
+msgctxt "#30109"
+msgid "Clear search history"
+msgstr ""
