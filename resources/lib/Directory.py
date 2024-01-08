@@ -311,61 +311,33 @@ class Directory:
         return 1
 
     def get_cast(self):
-        besetzung_pattern = r'Besetzung:\s?(.*?)(?=\r\n|$)'
-        darsteller_alt_pattern = r'Hauptdarsteller:\s?(.*?)(?=\r\n|$)'
-        darsteller_pattern = r'Hauptdarsteller|Mit|Besetzung:\s?(.*?)$'
-        shady_pattern = r'Mit(.*?)(?=\r\n|$)'
-        tuple_pattern = r'(?P<name>[\w\s]+)\s*\((?P<name_in_parentheses>[\w\s\W]+)\)'
         cast = []
+        part = None
+        cast_extract_pattern = r'(?P<name>.*?)(\s\((?P<role>.*?)\)|,|u.v.m| u.a.|u. a.)'
+        if 'Besetzung:' in self.description:
+            part = self.description.split('Besetzung:')
+        elif 'Hauptdarsteller:' in self.description:
+            part = self.description.split('Hauptdarsteller:')
+        elif 'Besetzung\r\n' in self.description:
+            part = self.description.split('Besetzung\r\n')
+        elif 'Hauptdarsteller\r\n' in self.description:
+            part = self.description.split('Hauptdarsteller\r\n')
+        elif 'Mit:' in self.description:
+            part = self.description.split('Mit:')
+        elif '\r\nMit ' in self.description:
+            part = self.description.split('\r\nMit ')
+
         try:
-            if 'Besetzung: ' in self.description :
-                matches = re.findall(besetzung_pattern, self.description, re.DOTALL)
-                for match in matches:
-                    actors = match.strip().split(', ')
-                    for actor in actors:
-                        if actor != '':
-                            match = re.match(tuple_pattern, actor)
-                            if match:
-                                cast.append((match.group('name').strip(), match.group('name_in_parentheses').strip()))
-                            else:
-                                cast.append(actor)
-                if len(cast) > 0:
-                    return cast
-            if 'Hauptdarsteller: ' in self.description:
-                matches = re.findall(darsteller_alt_pattern, self.description, re.DOTALL)
-                for match in matches:
-                    actors = match.strip().split(', ')
-                    for actor in actors:
-                        if actor != '':
-                            match = re.match(tuple_pattern, actor)
-                            if match:
-                                cast.append((match.group('name').strip(), match.group('name_in_parentheses').strip()))
-                            else:
-                                cast.append(actor)
-                if len(cast) > 0:
-                    return cast
-            if 'Hauptdarsteller:' in self.description or 'Mit:' in self.description or 'Besetzung:' in self.description:
-                matches = re.findall(darsteller_pattern, self.description, re.DOTALL)
-                for match in matches:
-                    actors = match.strip().split('\r\n')
-                    for actor in actors:
-                        if actor != '':
-                            match = re.match(tuple_pattern, actor)
-                            if match:
-                                cast.append((match.group('name').strip(), match.group('name_in_parentheses').strip()))
-                if len(cast) > 0:
-                    return cast
-            if 'Mit ' in self.description:
-                matches = re.findall(shady_pattern, self.description, re.DOTALL)
-                for match in matches:
-                    actors = match.strip().split(', ')
-                    for actor in actors:
-                        if actor != '':
-                            match = re.match(tuple_pattern, actor)
-                            if match:
-                                cast.append((match.group('name').strip(), match.group('name_in_parentheses').strip()))
-                if len(cast) > 0:
-                    return cast
+            if part is not None and len(part) > 1:
+                matches = re.findall(cast_extract_pattern, part[1], re.DOTALL)
+                for name, dirty_role, role in matches:
+                    if name.strip() != "":
+                        if '\r\n' in name.strip() or 'Regie:' in name.strip():
+                            break
+                        if role.strip() != "":
+                            cast.append((name.strip(), role.strip()))
+                        else:
+                            cast.append(name.strip())
             return cast
         except re.error as e:
             return cast
