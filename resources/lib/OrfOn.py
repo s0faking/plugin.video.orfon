@@ -614,11 +614,12 @@ class OrfOn:
     def build_video(self, item, link) -> Directory:
         self.log("Building Video %s (%s)" % (item['title'], item['id']))
         title = item['title']
-        if 'segments_complete' in item and 'video_type' in item and item['video_type'] == 'episode':
+        link = self.clean_url(link)
+
+        if 'segments_complete' in item and 'video_type' in item and item['video_type'] == 'episode' and '/segments' not in link:
             self.log("Found video with segments.")
             link = self.clean_url(link+"/segments")
-        else:
-            link = self.clean_url(link)
+
         if 'description' in item and item['description'] is not None and item['description'] != "":
             description = item['description']
         elif 'share_subject' in item:
