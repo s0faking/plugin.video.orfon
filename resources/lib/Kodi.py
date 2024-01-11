@@ -101,6 +101,8 @@ class Kodi:
         return "%s|User-Agent=%s" % (url, self.useragent)
 
     def play(self, videos):
+        if len(videos) < 1:
+            Dialog().notification('No Stream available', 'Unable to find a stream for this content', xbmcaddon.Addon().getAddonInfo('icon'))
         self.log("Running Play Action")
         playlist = PlayList(PLAYLIST_VIDEO)
         tracks = []

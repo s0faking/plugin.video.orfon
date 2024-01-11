@@ -424,19 +424,23 @@ class OrfOn:
         if '_embedded' in data and 'items' in data['_embedded']:
             for playitem in data['_embedded']['items']:
                 source = self.get_preferred_source(playitem)
-                video = self.build_video(playitem, source['src'])
-                video.set_stream({
-                    'url': source['src'],
-                    'drm': source['is_drm_protected'],
-                    'drm_token': playitem['drm_token'],
-                    'drm_widewine_url': self.get_widevine_url(),
-                    'drm_widewine_brand': self.get_widevine_brand(),
-                    'subtitle': self.get_subtitle_url(playitem, 'srt')
-                })
-                playlist.append(video)
+                if source:
+                    video = self.build_video(playitem, source['src'])
+                    video.set_stream({
+                        'url': source['src'],
+                        'drm': source['is_drm_protected'],
+                        'drm_token': playitem['drm_token'],
+                        'drm_widewine_url': self.get_widevine_url(),
+                        'drm_widewine_brand': self.get_widevine_brand(),
+                        'subtitle': self.get_subtitle_url(playitem, 'srt')
+                    })
+                    playlist.append(video)
         elif '_embedded' in data and 'item' in data['_embedded']:
             item = data['_embedded']['item']
             source = self.get_preferred_source(item)
+            if not source:
+                self.log("No video available yet.")
+                return []
             video = self.build_video(item, source['src'])
             video.set_stream({
                 'url': source['src'],
@@ -449,6 +453,9 @@ class OrfOn:
             playlist.append(video)
         elif 'sources' in data:
             source = self.get_preferred_source(data)
+            if not source:
+                self.log("No video available yet.")
+                return []
             video = self.build_video(data, source['src'])
             video.set_stream({
                 'url': source['src'],
@@ -607,7 +614,11 @@ class OrfOn:
     def build_video(self, item, link) -> Directory:
         self.log("Building Video %s (%s)" % (item['title'], item['id']))
         title = item['title']
-        link = self.clean_url(link)
+        if 'segments_complete' in item and 'video_type' in item and item['video_type'] == 'episode':
+            self.log("Found video with segments.")
+            link = self.clean_url(link+"/segments")
+        else:
+            link = self.clean_url(link)
         if 'description' in item and item['description'] is not None and item['description'] != "":
             description = item['description']
         elif 'share_subject' in item:
