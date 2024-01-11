@@ -23,6 +23,7 @@ class OrfOn:
 
     api_endpoint_settings = '/settings'
     api_endpoint_home = '/page/start'
+    api_endpoint_recently_added = '/page/startpage/newest'
     api_endpoint_schedule = '/schedule/%s'
     api_endpoint_shows = '/profiles?limit=%d'
     api_endpoint_shows_letter = '/profiles/lettergroup/%s'
@@ -145,7 +146,8 @@ class OrfOn:
         return json.loads(data)
 
     def get_main_menu(self) -> list:
-        items = [Directory(self.translate_string(30110, 'Frontpage'), '', self.api_endpoint_home, '', 'home'),
+        items = [Directory(self.translate_string(30144, 'Recently added'), '', '/recent', '', 'new'),
+                 Directory(self.translate_string(30110, 'Frontpage'), '', self.api_endpoint_home, '', 'home'),
                  Directory(self.translate_string(30111, 'Schedule'), '', '/schedule', '', 'schedule'),
                  Directory(self.translate_string(30112, 'Shows'), '', self.api_endpoint_shows % self.api_pager_limit, '', 'shows'),
                  Directory(self.translate_string(30113, 'Livestream'), '', self.api_endpoint_livestreams, '', 'live'),
@@ -197,6 +199,32 @@ class OrfOn:
                 'reel': reel
             }
         return channel_map
+
+    def get_last_uploads(self, last_upload_range=12):
+        current_date = datetime.now()
+        current_delta = (current_date - timedelta(hours=last_upload_range))
+
+        today_filter = current_date.strftime("%Y-%m-%d")
+        yesterday_filter = current_delta.strftime("%Y-%m-%d")
+
+        recently_added = []
+        if current_delta.strftime("%d.%m.%Y") != current_date.strftime("%d.%m.%Y"):
+            self.log("Also fetching videos from yesterday")
+            request_url = self.api_endpoint_schedule % yesterday_filter
+            more_uploads = self.get_url(request_url)
+            for item in more_uploads:
+                released = item.date()
+                released_datetime = datetime.fromisoformat(released).replace(tzinfo=None)
+                if released_datetime > current_delta:
+                    recently_added.append(item)
+        request_url = self.api_endpoint_schedule % today_filter
+        uploads = self.get_url(request_url)
+        for item in uploads:
+            released = item.date()
+            released_datetime = datetime.fromisoformat(released).replace(tzinfo=None)
+            if released_datetime > current_delta:
+                recently_added.append(item)
+        return reversed(recently_added)
 
     def get_schedule_dates(self) -> tuple:
         replay_days = self.get_replay_days()

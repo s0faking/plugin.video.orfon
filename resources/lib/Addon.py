@@ -131,6 +131,14 @@ def get_pvr_livestream(channelreel):
         kodi_worker.play([livestream])
 
 
+@route_plugin.route('/recent')
+def get_recently_added():
+    videos = api.get_last_uploads()
+    for video in videos:
+        kodi_worker.render(video)
+    kodi_worker.list_callback(sort=False)
+
+
 @route_plugin.route('/schedule')
 def get_schedule_selection():
     kodi_worker.log("Opening Schedule Selection", 'route')
