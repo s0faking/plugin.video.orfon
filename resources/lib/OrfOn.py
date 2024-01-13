@@ -625,7 +625,8 @@ class OrfOn:
         title = item['title']
         link = self.clean_url(link)
 
-        if 'segments_complete' in item and 'video_type' in item and item['video_type'] == 'episode' and '/segments' not in link:
+        # @todo: fix this mess
+        if 'segments_complete' in item and 'video_type' in item and item['video_type'] == 'episode' and '/segments' not in link and 'episode' in link:
             self.log("Found video with segments.")
             link = self.clean_url(link+"/segments")
 
