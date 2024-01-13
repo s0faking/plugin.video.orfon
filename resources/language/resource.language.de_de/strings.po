@@ -173,5 +173,5 @@ msgid "Accessibility"
 msgstr "Barrierefrei"
 
 msgctxt "#30148"
-msgid "Sendungen mit Untertitel"
-msgstr ""
+msgid "Broadcasts with subtitles"
+msgstr "Sendungen mit Untertitel"
