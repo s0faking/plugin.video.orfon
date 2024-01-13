@@ -63,6 +63,15 @@ class Kodi:
     def is_geo_locked(self) -> bool:
         return self.geo_lock
 
+    def hide_audio_description(self) -> bool:
+        return self.hide_audio_description_content
+
+    def hide_sign_language(self) -> bool:
+        return self.hide_sign_language_content
+
+    def hide_accessibility_menu(self) -> bool:
+        return self.hide_sign_language_content and self.hide_audio_description_content and not self.use_subtitles
+
     def set_geo_lock(self, lock):
         self.geo_lock = lock
 

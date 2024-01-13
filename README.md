@@ -12,6 +12,7 @@ Current Features
 * Schedule
 * Search
 * DRM Streams
+* Accessibility Broadcasts
 * Simple IPTV Integration
 
 Todos
@@ -19,8 +20,9 @@ Todos
 - [X] Subtitles
 - [X] Add Settings
 - [ ] Add option to show related content
-- [ ] Add a main menu entry for latest uploads
+- [X] Add a main menu entry for latest uploads
 - [X] Kodi translation still missing
+- [X] Accessibility
 
 
 Known Issues

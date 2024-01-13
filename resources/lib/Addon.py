@@ -32,10 +32,12 @@ if not sys.argv[0].startswith('plugin://'+kodi_worker.addon_id+'/dialog'):
 def get_main_menu():
     kodi_worker.log("Loading Main Menu", 'route')
     if kodi_worker.is_geo_locked():
-        kodi_worker.render(Directory(kodi_worker.translate_string(30128, 'Geo lock active', ' [COLOR red]*** %s ***[/COLOR]'), kodi_worker.translate_string(30129, 'Some content may not be available in your country'), '/'))
+        kodi_worker.render(Directory(kodi_worker.get_translation(30128, 'Geo lock active', ' [COLOR red]*** %s ***[/COLOR]'), kodi_worker.get_translation(30129, 'Some content may not be available in your country'), '/'))
     index_directories = api.get_main_menu()
     for index_directory in index_directories:
         kodi_worker.render(index_directory)
+    if not kodi_worker.hide_accessibility_menu():
+        kodi_worker.render(Directory(kodi_worker.get_translation(30147, 'Accessibility'), '', '/accessibility', '', 'accessibility'))
     kodi_worker.list_callback(sort=False)
 
 
@@ -45,6 +47,17 @@ def get_frontpage():
     teasers = api.get_frontpage()
     for teaser in teasers:
         kodi_worker.render(teaser)
+    kodi_worker.list_callback(sort=False)
+
+
+@route_plugin.route('/accessibility')
+def get_accessibility_menu():
+    if not kodi_worker.hide_sign_language():
+        kodi_worker.render(api.get_sign_language_menu())
+    if not kodi_worker.hide_audio_description():
+        kodi_worker.render(api.get_audio_description_menu())
+    if kodi_worker.use_subtitles:
+        kodi_worker.render(api.get_subtitles_menu())
     kodi_worker.list_callback(sort=False)
 
 

@@ -155,6 +155,15 @@ class OrfOn:
         items += self.get_frontpage(lanes=False)
         return items
 
+    def get_sign_language_menu(self):
+        return Directory(self.translate_string(30145, 'Broadcasts using sign language'), '', '/episodes/sign-language', '', 'oegscontent');
+
+    def get_audio_description_menu(self):
+        return Directory(self.translate_string(30146, 'Broadcasts with audio description'), '', '/episodes/visually-impaired', '', 'adcontent');
+
+    def get_subtitles_menu(self):
+        return Directory(self.translate_string(30148, 'Broadcasts with subtitles'), '', '/episodes/subtitles', '', 'adcontent');
+
     def get_settings(self) -> dict:
         # Return cached settings
         if self.settings:

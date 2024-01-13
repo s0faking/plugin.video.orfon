@@ -159,3 +159,19 @@ msgstr "Startet in"
 msgctxt "#30144"
 msgid "Recently added"
 msgstr "Neuste Sendungen"
+
+msgctxt "#30145"
+msgid "Broadcasts using sign language"
+msgstr "Sendungen mit Gebärdensprache"
+
+msgctxt "#30146"
+msgid "Broadcasts with audio description"
+msgstr "Sendungen mit Audiodeskription"
+
+msgctxt "#30147"
+msgid "Accessibility"
+msgstr "Barrierefrei"
+
+msgctxt "#30148"
+msgid "Sendungen mit Untertitel"
+msgstr ""
