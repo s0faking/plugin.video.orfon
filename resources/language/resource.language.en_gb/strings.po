@@ -179,3 +179,7 @@ msgstr ""
 msgctxt "#30149"
 msgid "Use segements"
 msgstr ""
+
+msgctxt "#30150"
+msgid "Related content"
+msgstr ""

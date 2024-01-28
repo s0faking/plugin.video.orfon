@@ -48,11 +48,15 @@ class Directory:
                 'url': "episode/%s/more" % self.source.get('episode_id'),
                 'type': 'update'
             })
-            #context_menu_items.append({
-            #    'title': 'Complete Show',
-            #    'url': "episode/%s" % self.source.get('episode_id'),
-            #    'type': 'update'
-            #})
+
+        if 'genre_id' in self.source and 'id' in self.source:
+            related_link = "/lane/related_content/%s/%s" % (self.source.get('genre_id'), self.source.get('id'))
+            context_menu_items.append({
+                'title': self.translate_string(30150, 'Related content'),
+                'url': related_link,
+                'type': 'update'
+            })
+
         return context_menu_items
 
     def get_context_menu(self) -> list:

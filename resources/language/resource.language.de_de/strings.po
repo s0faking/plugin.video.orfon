@@ -179,3 +179,7 @@ msgstr "Sendungen mit Untertitel"
 msgctxt "#30149"
 msgid "Use segements"
 msgstr "Kapitel verwenden"
+
+msgctxt "#30150"
+msgid "Related content"
+msgstr "Ähnliche Inhalte"
