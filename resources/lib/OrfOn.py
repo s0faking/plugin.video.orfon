@@ -38,6 +38,8 @@ class OrfOn:
     channel_map = False
     settings = False
 
+    use_segments = True
+
     supported_delivery = 'dash'
     quality_definitions = {
         'UHD': {
@@ -113,6 +115,9 @@ class OrfOn:
 
     def set_pager_limit(self, limit):
         self.api_pager_limit = limit
+
+    def set_segments_behaviour(self, use_segments):
+        self.use_segments = use_segments
 
     def get_auth_headers(self) -> dict:
         headers = self.get_headers()
@@ -625,10 +630,15 @@ class OrfOn:
         title = item['title']
         link = self.clean_url(link)
 
-        # @todo: fix this mess
-        if 'segments_complete' in item and 'video_type' in item and item['video_type'] == 'episode' and '/segments' not in link and 'episode' in link:
-            self.log("Found video with segments.")
-            link = self.clean_url(link+"/segments")
+        # Try to get the segements if available and activated for the api.
+        if self.use_segments:
+            if 'segments_complete' in item and 'video_type' in item and item['video_type'] == 'episode' and '/segments' not in link and 'episode' in link:
+                self.log("Found video with segments.")
+                link = self.clean_url(link+"/segments")
+        else:
+            if 'episode' in link and link.endswith('/segments'):
+                link = link.replace('/segments', '')
+
 
         if 'description' in item and item['description'] is not None and item['description'] != "":
             description = item['description']

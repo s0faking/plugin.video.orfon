@@ -175,3 +175,7 @@ msgstr "Barrierefrei"
 msgctxt "#30148"
 msgid "Broadcasts with subtitles"
 msgstr "Sendungen mit Untertitel"
+
+msgctxt "#30149"
+msgid "Use segements"
+msgstr "Kapitel verwenden"

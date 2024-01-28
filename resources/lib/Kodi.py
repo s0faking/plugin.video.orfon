@@ -37,6 +37,7 @@ class Kodi:
         self.base_path = self.addon.getAddonInfo('path')
         self.resource_path = os.path.join(self.base_path, "resources")
         self.use_subtitles = self.addon.getSetting('useSubtitles') == 'true'
+        self.use_segments = self.addon.getSetting('useSegments') == 'true'
         self.hide_audio_description_content = self.addon.getSetting('hideAD') == 'true'
         self.hide_sign_language_content = self.addon.getSetting('hideOEGS') == 'true'
         self.useragent = self.addon.getSetting('userAgent')

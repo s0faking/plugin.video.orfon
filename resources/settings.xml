@@ -4,6 +4,7 @@
         <setting id="useSubtitles" type="bool" label="30102" default="false" />
         <setting id="hideOEGS" type="bool" label="30103" default="false" />
         <setting id="hideAD" type="bool" label="30104" default="false" />
+        <setting id="useSegments" type="bool" label="30149" default="true" />
         <setting id="pagerLimit" type="labelenum" values="25|50|100|150" label="30105" option="int" default="50"/>
         <setting id="userAgent" default="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36" visible="false" />
     </category>

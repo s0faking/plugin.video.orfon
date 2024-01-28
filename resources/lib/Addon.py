@@ -15,6 +15,7 @@ if not sys.argv[0].startswith('plugin://'+kodi_worker.addon_id+'/dialog'):
     settings, settings_cached = kodi_worker.get_cached_file(settings_file)
     api = OrfOn(channel_map=channel_map, settings=settings, verbose=verbose, useragent=kodi_worker.useragent, translator=kodi_worker)
     api.set_pager_limit(kodi_worker.pager_limit)
+    api.set_segments_behaviour(kodi_worker.use_segments)
 
     kodi_worker.set_geo_lock(api.is_geo_locked())
     channel_map = api.get_channel_map()

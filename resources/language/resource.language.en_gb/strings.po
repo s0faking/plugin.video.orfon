@@ -175,3 +175,7 @@ msgstr ""
 msgctxt "#30148"
 msgid "Broadcasts with subtitles"
 msgstr ""
+
+msgctxt "#30149"
+msgid "Use segements"
+msgstr ""
