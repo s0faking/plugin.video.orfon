@@ -449,6 +449,20 @@ class OrfOn:
                         'subtitle': self.get_subtitle_url(playitem, 'srt')
                     })
                     playlist.append(video)
+                elif 'segments' in playitem.get('_embedded'):
+                    for segment in playitem.get('_embedded').get('segments'):
+                        source = self.get_preferred_source(segment)
+                        if source:
+                            video = self.build_video(segment, source['src'])
+                            video.set_stream({
+                                'url': source['src'],
+                                'drm': source['is_drm_protected'],
+                                'drm_token': segment['drm_token'],
+                                'drm_widewine_url': self.get_widevine_url(),
+                                'drm_widewine_brand': self.get_widevine_brand(),
+                                'subtitle': self.get_subtitle_url(segment, 'srt')
+                            })
+                            playlist.append(video)
         elif '_embedded' in data and 'item' in data['_embedded']:
             item = data['_embedded']['item']
             source = self.get_preferred_source(item)

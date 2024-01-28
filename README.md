@@ -19,7 +19,7 @@ Todos
 ----------------
 - [X] Subtitles
 - [X] Add Settings
-- [ ] Add option to show related content
+- [X] Add option to show related content
 - [X] Add a main menu entry for latest uploads
 - [X] Kodi translation still missing
 - [X] Accessibility
