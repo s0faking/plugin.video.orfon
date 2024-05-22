@@ -242,7 +242,7 @@ def clear_cache():
     tmp_settings, tmp_settings_cached = kodi_worker.get_cached_file(settings_file)
     kodi_worker.remove_file(settings_file)
     kodi_worker.remove_file(channel_map_file)
-    tmp_api = OrfOn(channel_map=tmp_channel_map, settings=tmp_settings, useragent=kodi_worker.useragent)
+    tmp_api = OrfOn(channel_map=tmp_channel_map, settings=tmp_settings, useragent=kodi_worker.useragent, kodi_worker=kodi_worker)
     tmp_api.channel_map = False
     tmp_api.settings = False
     dialog.update(33, kodi_worker.get_translation(30137, 'Loading channels'))
