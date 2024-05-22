@@ -1,5 +1,5 @@
 import xbmcaddon
-from xbmc import PlayList, PLAYLIST_VIDEO, Player, Keyboard, executebuiltin
+from xbmc import PlayList, PLAYLIST_VIDEO, Player, Keyboard, executebuiltin, log, LOGDEBUG
 from xbmcgui import ListItem, Dialog, DialogProgress
 from xbmcaddon import Addon
 from xbmcplugin import addDirectoryItem, endOfDirectory, setContent, setResolvedUrl, addSortMethod, SORT_METHOD_VIDEO_TITLE, SORT_METHOD_DATE
@@ -30,8 +30,7 @@ class Kodi:
     geo_lock = False
     max_cache_age = 60*60*24
 
-    def __init__(self, plugin, verbose=False):
-        self.verbose = verbose
+    def __init__(self, plugin):
         self.plugin = plugin
         self.init_storage()
         self.base_path = self.addon.getAddonInfo('path')
@@ -235,7 +234,6 @@ class Kodi:
 
     def build_art(self, item) -> dict:
         return {
-            # 'clearlogo': item.get_channel_logo(),
             'thumb': item.thumbnail or self.get_media('icon.jpg'),
             'poster': item.poster or self.get_media('poster.jpg'),
             'fanart': item.backdrop or self.get_media('fanart.jpg'),
@@ -320,7 +318,7 @@ class Kodi:
         file = "%s/%s" % (self.data_folder, file)
         try:
             st = os.stat(file)
-            age_seconds = time.time() - st.st_mtime
+            age_seconds = int(time.time() - st.st_mtime)
             self.log("Cache Age %d seconds" % age_seconds)
             return age_seconds
         except FileNotFoundError:
@@ -342,7 +340,7 @@ class Kodi:
             self.log("Permission to File %s was denied" % file, 'warning')
             return False
 
-    def load_json(self, file) -> dict:
+    def load_json(self, file) -> list:
         file = "%s/%s" % (self.data_folder, file)
         self.log("Loading JSON from %s" % file)
         try:
@@ -351,11 +349,11 @@ class Kodi:
             return data
         except FileNotFoundError:
             self.log("File %s could not be found" % file, 'warning')
-            return {}
+            return []
 
-    def log(self, msg, msg_type='info'):
-        if self.verbose:
-            print("[%s][ORFON][KODI] %s" % (msg_type.upper(), msg))
+    @staticmethod
+    def log(msg, msg_type='info'):
+        log("[%s][ORFON][KODI] %s" % (msg_type.upper(), msg), LOGDEBUG)
 
     @staticmethod
     def execute(command):

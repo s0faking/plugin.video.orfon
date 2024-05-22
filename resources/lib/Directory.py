@@ -3,8 +3,7 @@ from datetime import datetime
 
 
 class Directory:
-    def __init__(self, title, description, link, content_id="", content_type="", thumbnail="", backdrop="", poster="", source={}, verbose=True, translator=None):
-        self.verbose = verbose
+    def __init__(self, title, description, link, content_id="", content_type="", thumbnail="", backdrop="", poster="", source={}, translator=None):
         self.translator = translator
         self.title = title
         if description:
@@ -405,5 +404,4 @@ class Directory:
             self.log('Stream Data available %d' % len(self.get_stream()))
 
     def log(self, msg, msg_type='info'):
-        if self.verbose:
-            print("[%s][ORFON][DIRECTORY] %s" % (msg_type.upper(), msg))
+        self.translator.log("[%s][ORFON][DIRECTORY] %s" % (msg_type.upper(), msg))

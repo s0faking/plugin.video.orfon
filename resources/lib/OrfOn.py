@@ -60,8 +60,8 @@ class OrfOn:
     }
     drm_widewine_brand = '13f2e056-53fe-4469-ba6d-999970dbe549'
 
-    def __init__(self, channel_map=None, settings=None, verbose=False, useragent=False, translator=False):
-        self.verbose = verbose
+    def __init__(self, channel_map=None, settings=None, useragent=False, kodi_worker=None):
+        self.kodi_worker = kodi_worker
         if useragent:
             self.useragent = useragent
 
@@ -76,7 +76,6 @@ class OrfOn:
         else:
             self.settings = settings
 
-        self.translator = translator
         self.type_map = {
             'highlights': self.translate_string(30115, 'Highlights'),
             'genres': self.translate_string(30116, 'Categories'),
@@ -108,8 +107,8 @@ class OrfOn:
             return False
 
     def translate_string(self, translation_id, fallback, replace=None):
-        if self.translator:
-            return self.translator.get_translation(translation_id, fallback, replace)
+        if self.kodi_worker:
+            return self.kodi_worker.get_translation(translation_id, fallback, replace)
         else:
             return fallback
 
@@ -623,21 +622,19 @@ class OrfOn:
 
         if item_type == 'genre':
             link = "%s/profiles?limit=%d" % (link, self.api_pager_limit)
-            return Directory(item['title'], description, link, item['id'], item['type'], banner, backdrop, poster, item, translator=self.translator)
+            return Directory(item['title'], description, link, item['id'], item['type'], banner, backdrop, poster, item, translator=self.kodi_worker)
         elif item_id == 'lane':
-            return Directory(item['title'], description, link, item['id'], item['type'], banner, backdrop, poster, item, translator=self.translator)
+            return Directory(item['title'], description, link, item['id'], item['type'], banner, backdrop, poster, item, translator=self.kodi_worker)
         elif item_id == 'highlights':
-            return Directory(self.type_map['highlights'], description, link, item['id'], item['type'], banner, backdrop, poster, item, translator=self.translator)
+            return Directory(self.type_map['highlights'], description, link, item['id'], item['type'], banner, backdrop, poster, item, translator=self.kodi_worker)
         elif item_id == 'genres':
-            return Directory(self.type_map['genres'], description, link, item['id'], item['type'], banner, backdrop, poster, item, translator=self.translator)
+            return Directory(self.type_map['genres'], description, link, item['id'], item['type'], banner, backdrop, poster, item, translator=self.kodi_worker)
         elif item_id == 'orflive':
-            self.log("Skipping Livestream from Orf On because its broken on the beta")
-            # This is broken on the beta version
-            # return Directory(self.type_map['orflive'], description, link, item['id'], item['type'], banner, backdrop, poster, item)
+            return Directory(self.type_map['orflive'], description, link, item['id'], item['type'], banner, backdrop, poster, item)
         elif 'title' in item and item['title'] and 'type' in item:
-            return Directory(item['title'], description, link, item['id'], item['type'], banner, backdrop, poster, item, translator=self.translator)
+            return Directory(item['title'], description, link, item['id'], item['type'], banner, backdrop, poster, item, translator=self.kodi_worker)
         elif 'title' in item and item['title'] and 'children_count' in item:
-            return Directory(item['title'], description, link, item['id'], 'directory', banner, backdrop, poster, item, translator=self.translator)
+            return Directory(item['title'], description, link, item['id'], 'directory', banner, backdrop, poster, item, translator=self.kodi_worker)
 
     def build_video(self, item, link) -> Directory:
         self.log("Building Video %s (%s)" % (item['title'], item['id']))
@@ -653,7 +650,6 @@ class OrfOn:
             if 'episode' in link and link.endswith('/segments'):
                 link = link.replace('/segments', '')
 
-
         if 'description' in item and item['description'] is not None and item['description'] != "":
             description = item['description']
         elif 'share_subject' in item:
@@ -666,7 +662,7 @@ class OrfOn:
         video_id = item['id']
         banner, backdrop, poster = self.get_images(item)
         item['channel_meta'] = self.channel_map
-        return Directory(title, description, link, video_id, video_type, banner, backdrop, poster, item, translator=self.translator)
+        return Directory(title, description, link, video_id, video_type, banner, backdrop, poster, item, translator=self.kodi_worker)
 
     def clean_url(self, url):
         return url.replace(self.api_base, "")
@@ -690,11 +686,7 @@ class OrfOn:
         return "", "", ""
 
     def log(self, msg, msg_type='info'):
-        if self.verbose:
-            print("[%s][ORFON][API] %s" % (msg_type.upper(), msg))
+        self.kodi_worker.log("[%s][ORFON][API] %s" % (msg_type.upper(), msg))
 
     def print_obj(self, obj):
-        if self.verbose:
-            self.log('------- OBJ START -------')
-            self.log(json.dumps(obj, indent=4))
-            self.log('------- END START -------')
+        self.log(json.dumps(obj, indent=4))

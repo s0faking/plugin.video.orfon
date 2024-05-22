@@ -3,17 +3,16 @@ import sys
 from Kodi import *
 import routing
 
-verbose = True
 settings_file = 'settings.json'
 channel_map_file = 'channels.json'
 search_history_file = 'search_history'
 
 route_plugin = routing.Plugin()
-kodi_worker = Kodi(route_plugin, verbose=verbose)
+kodi_worker = Kodi(route_plugin)
 if not sys.argv[0].startswith('plugin://'+kodi_worker.addon_id+'/dialog'):
     channel_map, channel_map_cached = kodi_worker.get_cached_file(channel_map_file)
     settings, settings_cached = kodi_worker.get_cached_file(settings_file)
-    api = OrfOn(channel_map=channel_map, settings=settings, verbose=verbose, useragent=kodi_worker.useragent, translator=kodi_worker)
+    api = OrfOn(channel_map=channel_map, settings=settings, useragent=kodi_worker.useragent, kodi_worker=kodi_worker)
     api.set_pager_limit(kodi_worker.pager_limit)
     api.set_segments_behaviour(kodi_worker.use_segments)
 
@@ -39,7 +38,7 @@ def get_main_menu():
         kodi_worker.render(index_directory)
     if not kodi_worker.hide_accessibility_menu():
         kodi_worker.render(Directory(kodi_worker.get_translation(30147, 'Accessibility'), '', '/accessibility', '', 'accessibility'))
-    kodi_worker.list_callback(sort=False)
+    kodi_worker.list_callback()
 
 
 @route_plugin.route('/page/start')
@@ -48,7 +47,7 @@ def get_frontpage():
     teasers = api.get_frontpage()
     for teaser in teasers:
         kodi_worker.render(teaser)
-    kodi_worker.list_callback(sort=False)
+    kodi_worker.list_callback()
 
 
 @route_plugin.route('/accessibility')
@@ -59,7 +58,7 @@ def get_accessibility_menu():
         kodi_worker.render(api.get_audio_description_menu())
     if kodi_worker.use_subtitles:
         kodi_worker.render(api.get_subtitles_menu())
-    kodi_worker.list_callback(sort=False)
+    kodi_worker.list_callback()
 
 
 @route_plugin.route('/livestreams')
@@ -68,7 +67,7 @@ def get_livestreams():
     streams = api.get_live_schedule()
     for stream in streams:
         kodi_worker.render(stream)
-    kodi_worker.list_callback(sort=False)
+    kodi_worker.list_callback()
 
 
 @route_plugin.route('/restart/<livestreamid>')
@@ -87,7 +86,7 @@ def get_profile(profileid):
     if len(directories) > 1:
         for directory in directories:
             kodi_worker.render(directory)
-        kodi_worker.list_callback(sort=False)
+        kodi_worker.list_callback()
     else:
         videos = api.load_stream_data('/profile/%s/episodes' % profileid)
         kodi_worker.play(videos)
@@ -106,7 +105,7 @@ def get_show_from_episode(episodeid):
     other_episodes = api.get_related(episodeid)
     for other_episode in other_episodes:
         kodi_worker.render(other_episode)
-    kodi_worker.list_callback(sort=False)
+    kodi_worker.list_callback()
 
 
 @route_plugin.route('/episode/<episodeid>/segments')
@@ -150,7 +149,7 @@ def get_recently_added():
     videos = api.get_last_uploads()
     for video in videos:
         kodi_worker.render(video)
-    kodi_worker.list_callback(sort=False)
+    kodi_worker.list_callback()
 
 
 @route_plugin.route('/schedule')
@@ -163,7 +162,7 @@ def get_schedule_selection():
         api.log("Loading %s Schedule" % filters[selected])
         request_url = api.api_endpoint_schedule % filters[selected]
         target_url = kodi_worker.plugin.url_for_path(request_url)
-        kodi_worker.list_callback(sort=False)
+        kodi_worker.list_callback()
         kodi_worker.execute('Container.Update(%s, replace)' % target_url)
     else:
         api.log("Canceled selection")
@@ -178,7 +177,7 @@ def get_schedule(scheduledate):
         directory.annotate_channel()
         directory.annotate_time()
         kodi_worker.render(directory)
-    kodi_worker.list_callback(sort=False)
+    kodi_worker.list_callback()
 
 
 @route_plugin.route('/search')
@@ -198,7 +197,7 @@ def get_search_results(query):
     directories = api.get_search(query)
     for directory in directories:
         kodi_worker.render(directory)
-    kodi_worker.list_callback(sort=False)
+    kodi_worker.list_callback()
 
 
 @route_plugin.route('/search-partial/<section>/<query>')
@@ -206,7 +205,7 @@ def get_search_partial(section, query):
     directories = api.get_search_partial(section, query, route_plugin.args)
     for directory in directories:
         kodi_worker.render(directory)
-    kodi_worker.list_callback(sort=False)
+    kodi_worker.list_callback()
 
 
 @route_plugin.route('/search/query')
@@ -215,7 +214,7 @@ def get_search_dialog():
     query = kodi_worker.get_keyboard_input()
     search_url = "/search/results/%s" % query
     search_history_dir = Directory(query, "", search_url)
-    kodi_worker.list_callback(sort=False)
+    kodi_worker.list_callback()
     if query and query.strip() != "":
         kodi_worker.store_directory(search_history_dir, 'search_history')
         target_url = kodi_worker.plugin.url_for_path(search_url)
@@ -243,7 +242,7 @@ def clear_cache():
     tmp_settings, tmp_settings_cached = kodi_worker.get_cached_file(settings_file)
     kodi_worker.remove_file(settings_file)
     kodi_worker.remove_file(channel_map_file)
-    tmp_api = OrfOn(channel_map=tmp_channel_map, settings=tmp_settings, verbose=verbose, useragent=kodi_worker.useragent)
+    tmp_api = OrfOn(channel_map=tmp_channel_map, settings=tmp_settings, useragent=kodi_worker.useragent)
     tmp_api.channel_map = False
     tmp_api.settings = False
     dialog.update(33, kodi_worker.get_translation(30137, 'Loading channels'))
@@ -263,7 +262,7 @@ def get_url(url):
     directories = api.get_url(request_url)
     for directory in directories:
         kodi_worker.render(directory)
-    kodi_worker.list_callback(sort=False)
+    kodi_worker.list_callback()
 
 
 def run():
