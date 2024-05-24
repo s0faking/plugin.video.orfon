@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 class Directory:
-    def __init__(self, title, description, link, content_id="", content_type="", thumbnail="", backdrop="", poster="", source={}, translator=None):
+    def __init__(self, title, description, link, content_id="", content_type="", thumbnail="", backdrop="", poster="", source={}, translator=None, proxy=False):
         self.translator = translator
         self.title = title
         if description:
@@ -21,6 +21,12 @@ class Directory:
         self.videos = {}
         self.context_menu = self.build_content_menu()
         self.pvr_mode = False
+
+    def has_segments(self):
+        seg_matcher = r"\/episode\/[1-10].*\/segments"
+        if re.search(seg_matcher, self.link):
+            return True
+        return False
 
     def build_content_menu(self) -> list:
         context_menu_items = []
@@ -404,4 +410,5 @@ class Directory:
             self.log('Stream Data available %d' % len(self.get_stream()))
 
     def log(self, msg, msg_type='info'):
-        self.translator.log("[%s][ORFON][DIRECTORY] %s" % (msg_type.upper(), msg))
+        if self.translator:
+            self.translator.log("[%s][ORFON][DIRECTORY] %s" % (msg_type.upper(), msg))

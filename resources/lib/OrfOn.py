@@ -150,23 +150,23 @@ class OrfOn:
         return json.loads(data)
 
     def get_main_menu(self) -> list:
-        items = [Directory(self.translate_string(30144, 'Recently added'), '', '/recent', '', 'new'),
-                 Directory(self.translate_string(30110, 'Frontpage'), '', self.api_endpoint_home, '', 'home'),
-                 Directory(self.translate_string(30111, 'Schedule'), '', '/schedule', '', 'schedule'),
-                 Directory(self.translate_string(30112, 'Shows'), '', self.api_endpoint_shows % self.api_pager_limit, '', 'shows'),
-                 Directory(self.translate_string(30113, 'Livestream'), '', self.api_endpoint_livestreams, '', 'live'),
-                 Directory(self.translate_string(30114, 'Search'), '', '/search', '', 'search')]
+        items = [Directory(self.translate_string(30144, 'Recently added'), '', '/recent', '', 'new', translator=self.kodi_worker),
+                 Directory(self.translate_string(30110, 'Frontpage'), '', self.api_endpoint_home, '', 'home', translator=self.kodi_worker),
+                 Directory(self.translate_string(30111, 'Schedule'), '', '/schedule', '', 'schedule', translator=self.kodi_worker),
+                 Directory(self.translate_string(30112, 'Shows'), '', self.api_endpoint_shows % self.api_pager_limit, '', 'shows', translator=self.kodi_worker),
+                 Directory(self.translate_string(30113, 'Livestream'), '', self.api_endpoint_livestreams, '', 'live', translator=self.kodi_worker),
+                 Directory(self.translate_string(30114, 'Search'), '', '/search', '', 'search', translator=self.kodi_worker)]
         items += self.get_frontpage(lanes=False)
         return items
 
     def get_sign_language_menu(self):
-        return Directory(self.translate_string(30145, 'Broadcasts using sign language'), '', '/episodes/sign-language', '', 'oegscontent');
+        return Directory(self.translate_string(30145, 'Broadcasts using sign language'), '', '/episodes/sign-language', '', 'oegscontent', translator=self.kodi_worker)
 
     def get_audio_description_menu(self):
-        return Directory(self.translate_string(30146, 'Broadcasts with audio description'), '', '/episodes/visually-impaired', '', 'adcontent');
+        return Directory(self.translate_string(30146, 'Broadcasts with audio description'), '', '/episodes/visually-impaired', '', 'adcontent', translator=self.kodi_worker)
 
     def get_subtitles_menu(self):
-        return Directory(self.translate_string(30148, 'Broadcasts with subtitles'), '', '/episodes/subtitles', '', 'adcontent');
+        return Directory(self.translate_string(30148, 'Broadcasts with subtitles'), '', '/episodes/subtitles', '', 'adcontent', translator=self.kodi_worker)
 
     def get_settings(self) -> dict:
         # Return cached settings
@@ -630,7 +630,7 @@ class OrfOn:
         elif item_id == 'genres':
             return Directory(self.type_map['genres'], description, link, item['id'], item['type'], banner, backdrop, poster, item, translator=self.kodi_worker)
         elif item_id == 'orflive':
-            return Directory(self.type_map['orflive'], description, link, item['id'], item['type'], banner, backdrop, poster, item)
+            return Directory(self.type_map['orflive'], description, link, item['id'], item['type'], banner, backdrop, poster, item, translator=self.kodi_worker)
         elif 'title' in item and item['title'] and 'type' in item:
             return Directory(item['title'], description, link, item['id'], item['type'], banner, backdrop, poster, item, translator=self.kodi_worker)
         elif 'title' in item and item['title'] and 'children_count' in item:

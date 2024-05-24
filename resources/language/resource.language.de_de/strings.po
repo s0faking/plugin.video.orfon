@@ -183,3 +183,7 @@ msgstr "Kapitel verwenden"
 msgctxt "#30150"
 msgid "Related content"
 msgstr "Ähnliche Inhalte"
+
+msgctxt "#30151"
+msgid "Show segements"
+msgstr "Kapitel anzeigen"

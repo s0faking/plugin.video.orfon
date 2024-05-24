@@ -37,6 +37,7 @@ class Kodi:
         self.resource_path = os.path.join(self.base_path, "resources")
         self.use_subtitles = self.addon.getSetting('useSubtitles') == 'true'
         self.use_segments = self.addon.getSetting('useSegments') == 'true'
+        self.show_segments = self.addon.getSetting('showSegments') == 'true'
         self.hide_audio_description_content = self.addon.getSetting('hideAD') == 'true'
         self.hide_sign_language_content = self.addon.getSetting('hideOEGS') == 'true'
         self.useragent = self.addon.getSetting('userAgent')
@@ -93,7 +94,11 @@ class Kodi:
                 list_item = self.render_video(item)
                 link = item.url()
                 route = self.plugin.url_for_path(link)
-                addDirectoryItem(self.plugin.handle, url=route, listitem=list_item, isFolder=False)
+                if self.use_segments and self.show_segments and item.has_segments():
+                    folder = True
+                else:
+                    folder = False
+                addDirectoryItem(self.plugin.handle, url=route, listitem=list_item, isFolder=folder)
             else:
                 list_item = self.render_directory(item)
                 link = item.url()
@@ -109,6 +114,10 @@ class Kodi:
     def build_stream_url(self, url):
         return "%s|User-Agent=%s" % (url, self.useragent)
 
+    def play_url(self, url):
+        play_item = ListItem(path=url, offscreen=True)
+        setResolvedUrl(self.plugin.handle, True, play_item)
+
     def play(self, videos):
         if len(videos) < 1:
             Dialog().notification('No Stream available', 'Unable to find a stream for this content', xbmcaddon.Addon().getAddonInfo('icon'))
@@ -119,11 +128,15 @@ class Kodi:
             tracks.append(video)
 
         if len(tracks) > 1:
-            for track in tracks:
-                play_item = self.render_video(track)
-                play_stream = self.build_stream_url(track.get_stream().get('url'))
-                playlist.add(play_stream, play_item)
-            self.log("Playing Playlist %s from position %d" % (playlist.size(), playlist.getposition()))
+            if self.show_segments:
+                for track in tracks:
+                    self.render(track)
+            else:
+                for track in tracks:
+                    play_item = self.render_video(track)
+                    play_stream = self.build_stream_url(track.get_stream().get('url'))
+                    playlist.add(play_stream, play_item)
+                self.log("Playing Playlist %s from position %d" % (playlist.size(), playlist.getposition()))
         else:
             self.log("Playing Single Video")
             for track in tracks:
@@ -267,7 +280,7 @@ class Kodi:
         json_data = self.load_json(target_file)
         directories = []
         for json_item in json_data:
-            directory = Directory(json_item.get('title'), json_item.get('description'), json_item.get('link'))
+            directory = Directory(json_item.get('title'), json_item.get('description'), json_item.get('link'), translator=self)
             directories.append(directory)
         return directories
 

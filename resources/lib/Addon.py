@@ -32,12 +32,12 @@ if not sys.argv[0].startswith('plugin://'+kodi_worker.addon_id+'/dialog'):
 def get_main_menu():
     kodi_worker.log("Loading Main Menu", 'route')
     if kodi_worker.is_geo_locked():
-        kodi_worker.render(Directory(kodi_worker.get_translation(30128, 'Geo lock active', ' [COLOR red]*** %s ***[/COLOR]'), kodi_worker.get_translation(30129, 'Some content may not be available in your country'), '/'))
+        kodi_worker.render(Directory(kodi_worker.get_translation(30128, 'Geo lock active', ' [COLOR red]*** %s ***[/COLOR]'), kodi_worker.get_translation(30129, 'Some content may not be available in your country'), '/', translator=kodi_worker))
     index_directories = api.get_main_menu()
     for index_directory in index_directories:
         kodi_worker.render(index_directory)
     if not kodi_worker.hide_accessibility_menu():
-        kodi_worker.render(Directory(kodi_worker.get_translation(30147, 'Accessibility'), '', '/accessibility', '', 'accessibility'))
+        kodi_worker.render(Directory(kodi_worker.get_translation(30147, 'Accessibility'), '', '/accessibility', '', 'accessibility', translator=kodi_worker))
     kodi_worker.list_callback()
 
 
@@ -112,7 +112,13 @@ def get_show_from_episode(episodeid):
 def get_segements(episodeid):
     kodi_worker.log("Playing Episode %s" % episodeid, 'route')
     videos = api.load_stream_data('/episode/%s/segments?limit=500' % episodeid)
-    kodi_worker.play(videos)
+    if kodi_worker.use_segments and kodi_worker.show_segments:
+        for video in videos:
+            video.debug()
+            kodi_worker.render(video)
+        kodi_worker.list_callback()
+    else:
+        kodi_worker.play(videos)
 
 
 @route_plugin.route('/segment/<segmentid>')
@@ -184,7 +190,7 @@ def get_schedule(scheduledate):
 def get_search():
     kodi_worker.log("Opening Search History", 'route')
     search_link = '/search/query'
-    search_dir = Directory(kodi_worker.get_translation(30131, 'Enter search ...', '%s ...'), "", search_link)
+    search_dir = Directory(kodi_worker.get_translation(30131, 'Enter search ...', '%s ...'), "", search_link, translator=kodi_worker)
     kodi_worker.render(search_dir)
     directories = kodi_worker.get_stored_directories(search_history_file)
     for directory in directories:
@@ -213,7 +219,7 @@ def get_search_dialog():
     kodi_worker.log("Opening Search Dialog", 'route')
     query = kodi_worker.get_keyboard_input()
     search_url = "/search/results/%s" % query
-    search_history_dir = Directory(query, "", search_url)
+    search_history_dir = Directory(query, "", search_url, translator=kodi_worker)
     kodi_worker.list_callback()
     if query and query.strip() != "":
         kodi_worker.store_directory(search_history_dir, 'search_history')
@@ -257,12 +263,17 @@ def clear_cache():
 
 @route_plugin.route('<path:url>')
 def get_url(url):
-    kodi_worker.log("Opening Generic Url %s" % url, 'route')
-    request_url = kodi_worker.build_url(url, route_plugin.args)
-    directories = api.get_url(request_url)
-    for directory in directories:
-        kodi_worker.render(directory)
-    kodi_worker.list_callback()
+    if re.search(r"^/https?://", url):
+        url = url[1:]
+        kodi_worker.log("Opening Video Url %s" % url, 'route')
+        kodi_worker.play_url(url)
+    else:
+        kodi_worker.log("Opening Generic Url %s" % url, 'route')
+        request_url = kodi_worker.build_url(url, route_plugin.args)
+        directories = api.get_url(request_url)
+        for directory in directories:
+            kodi_worker.render(directory)
+        kodi_worker.list_callback()
 
 
 def run():
