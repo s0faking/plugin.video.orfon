@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.orfon" name="ORF ON" version="1.0.0+beta" provider-name="s0fak1ng">
+<addon id="plugin.video.orfon" name="ORF ON" version="1.0.1+beta" provider-name="s0fak1ng">
     <requires>
         <import addon="xbmc.python" version="3.0.0"/>
-        <import addon="script.module.routing"/>
+        <import addon="script.module.routing" version="0.2.3"/>
         <import addon="script.module.inputstreamhelper" version="0.5.0"/>
     </requires>
     <extension point="xbmc.python.pluginsource" library="resources/lib/default.py">
@@ -25,11 +25,11 @@
             <icon>resources/icon.png</icon>
             <fanart>resources/fanart.jpg</fanart>
         </assets>
-        <news>v1.0.0 beta
-            - beta version
-            - most stuff is working but everything needs to be tested a little more
-            - orf on is still in beta so stuff might change until the final release in april 2024
-            - translation stuff is still missing
+        <news>v1.0.1 beta
+            - fix routing requirement
+            - show segment option added
+            - cache reload fix
+            - related video option
         </news>
     </extension>
 </addon>
