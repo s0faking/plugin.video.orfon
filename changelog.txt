@@ -1,8 +1,9 @@
-v1.0.1 beta (2023-05-28)
+v1.0.1 beta (2023-06-05)
 - fix routing requirement
 - show segment option added
 - cache reload fix
 - related video option
+- fix UA stream errors (#6)
 
 
 

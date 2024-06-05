@@ -32,6 +32,7 @@ class OrfOn:
     api_endpoint_search_partial = '/search-partial/%s/%s?limit=%d'
     api_endpoint_livestreams = '/livestreams'
     api_endpoint_livestream = '/livestream/%s'
+    api_endpoint_timeshift = '/timeshift/channel/%d/sources'
     api_endpoint_channels = '/channels?limit=200'
     api_endpoint_channel_livestream = '/livestreams/channel/%s'
 
@@ -59,6 +60,7 @@ class OrfOn:
         }
     }
     drm_widewine_brand = '13f2e056-53fe-4469-ba6d-999970dbe549'
+    drm_widewine_brand_ts = '319f2ca9-0d0c-4e5b-bb70-72efae61dad7'
 
     def __init__(self, channel_map=None, settings=None, useragent=False, kodi_worker=None):
         self.kodi_worker = kodi_worker
@@ -131,7 +133,9 @@ class OrfOn:
     def get_widevine_url(self) -> str:
         return self.settings.get('drm_endpoints').get('widevine')
 
-    def get_widevine_brand(self) -> str:
+    def get_widevine_brand(self, timeshift=False) -> str:
+        if timeshift:
+            return self.drm_widewine_brand_ts
         return self.drm_widewine_brand
 
     def get_replay_days(self) -> int:
@@ -372,53 +376,31 @@ class OrfOn:
                 profile_details = self.get_url(profile_url)
                 return profile_details
 
+    def get_timeshift_stream_url(self, item) -> str:
+        if '_embedded' in item.source and 'channel' in item.source['_embedded']:
+            channel_id = item.source['_embedded']['channel']['id']
+            timeshift_url = self.api_endpoint_timeshift % channel_id
+            timeshift_data = self.auth_request(timeshift_url)
+            if timeshift_data and 'sources' in timeshift_data and self.supported_delivery in timeshift_data['sources']:
+                source = timeshift_data['sources'][self.supported_delivery]
+                source['drm_token'] = timeshift_data['drm_token']
+                return source
+
     def get_restart_stream_url(self, item) -> str:
-        restart_url = item.get_restart()
-
-        # Get Clean Restart Url
-        parsed = urlparse(restart_url)
-        query = parsed.query.split("&")
-        query_pattern = r'(.*?)=(.*)'
-        restart_params = {}
-        for query_item in query:
-            query_pairs = re.findall(query_pattern, query_item)
-            label, value = query_pairs[0]
-            restart_params[label] = value
-        restart_url_clean = "%s://%s%s" % (parsed.scheme, parsed.netloc, parsed.path)
-
-        # Fetch restart Manifest
-        headers = self.get_headers()
-        try:
-            self.log("Loading %s" % restart_url)
-            request = urllib_urlopen(urllib_Request(restart_url, headers=headers))
-        except urllib_HTTPError as error:
-            self.log("%s (%s)" % (error, restart_url), 'error')
-            return ""
-
-        data = request.read()
-        restart_data = json.loads(data)
-
-        # Build restart url
-        for restart_data_item in restart_data:
-            restart_id = restart_data_item.get('id')
-            restart_ts = restart_data_item.get('metaData').get('timestamp')
-            restart_params['startTime'] = restart_ts
-            restart_params.pop('state')
-            restart_query = urlencode(restart_params)
-            return "%s%s/manifests/%s/?%s" % (restart_url_clean, restart_id, self.supported_delivery, restart_query)
-        return ""
+        timeshift_sources = self.get_timeshift_stream_url(item)
+        if item.has_timeshift() and timeshift_sources:
+            start_time = item.get_start_time_iso()
+            return "%s?begin=%s" % (timeshift_sources['src'], start_time)
 
     def get_restart_stream(self, item) -> Directory:
-        restart_url = self.get_restart_stream_url(item)
-        item_source = item.get_source()
-        source = self.get_preferred_source(item_source)
-        source['src'] = restart_url
+        source = self.get_timeshift_stream_url(item)
+        start_time = item.get_start_time_iso()
         item.set_stream({
-            'url': source['src'],
+            'url': "%s&begin=%s" % (source['src'], start_time),
             'drm': source['is_drm_protected'],
-            'drm_token': item_source['drm_token'],
+            'drm_token': source['drm_token'],
             'drm_widewine_url': self.get_widevine_url(),
-            'drm_widewine_brand': self.get_widevine_brand()
+            'drm_widewine_brand': self.get_widevine_brand(True)
         })
         return item
 

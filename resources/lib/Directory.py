@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class Directory:
@@ -113,9 +113,11 @@ class Directory:
         if 'main_channel_id' in item and item['main_channel_id'] is not None:
             if str(item['main_channel_id']) in item['channel_meta']:
                 meta['channel'] = item['channel_meta'][str(item['main_channel_id'])]
+                meta['channel_id'] = item['main_channel_id']
         elif 'channel_id' in item and item['channel_id'] is not None:
             if str(item['channel_id']) in item['channel_meta']:
                 meta['channel'] = item['channel_meta'][str(item['channel_id'])]
+                meta['channel_id'] = item['channel_id']
         elif 'SSA' in item and 'channel' in item['SSA']:
             for channel in item['channel_meta']:
                 if item['channel_meta'][channel]['reel'] == item['SSA']['channel']:
@@ -201,6 +203,12 @@ class Directory:
     def get_start_time(self):
         return datetime.fromisoformat(self.get_source().get('start')).replace(tzinfo=None)
 
+    def get_start_time_iso(self):
+        ref_date = datetime.fromisoformat(self.get_source().get('start')) - timedelta(hours=2)
+        d_date = ref_date.strftime("%Y%m%d")
+        d_time = ref_date.strftime("%H%M%S")
+        return "%sT%s" % (d_date, d_time)
+
     def get_end_time(self):
         return datetime.fromisoformat(self.get_source().get('end')).replace(tzinfo=None)
 
@@ -209,6 +217,12 @@ class Directory:
             if self.source['channel_meta'][channel]['reel'] == channel_reel:
                 self.meta['channel'] = self.source['channel_meta'][channel]
                 break
+
+    def has_timeshift(self):
+        if 'timeshift_available_livestream' in self.source and 'video_type' in self.source:
+            if self.source['timeshift_available_livestream'] and self.source['video_type'] == 'timeshift':
+                return True
+        return False
 
     def get_restart(self):
         if 'restart' in self.source:

@@ -30,6 +30,7 @@
             - show segment option added
             - cache reload fix
             - related video option
+            - fix UA stream errors
         </news>
     </extension>
 </addon>

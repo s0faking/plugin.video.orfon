@@ -108,6 +108,7 @@ class Kodi:
     def restart(self, video):
         self.log("Running Restart Play Action")
         play_item = self.render_video(video)
+        play_item.setProperty('inputstream.adaptive.play_timeshift_buffer', 'true')
         streaming_url = video.get_stream().get('url')
         Player().play(streaming_url, play_item)
 
@@ -115,6 +116,7 @@ class Kodi:
         return "%s|User-Agent=%s" % (url, self.useragent)
 
     def play_url(self, url):
+        url = self.build_stream_url(unquote(url))
         play_item = ListItem(path=url, offscreen=True)
         setResolvedUrl(self.plugin.handle, True, play_item)
 
@@ -134,7 +136,7 @@ class Kodi:
             else:
                 for track in tracks:
                     play_item = self.render_video(track)
-                    play_stream = self.build_stream_url(track.get_stream().get('url'))
+                    play_stream = self.build_stream_url(unquote(track.get_stream().get('url')))
                     playlist.add(play_stream, play_item)
                 self.log("Playing Playlist %s from position %d" % (playlist.size(), playlist.getposition()))
         else:
