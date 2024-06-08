@@ -466,14 +466,29 @@ class OrfOn:
                 self.log("No video available yet.")
                 return []
             video = self.build_video(data, source['src'])
-            video.set_stream({
-                'url': source['src'],
-                'drm': source['is_drm_protected'],
-                'drm_token': data['drm_token'],
-                'drm_widewine_url': self.get_widevine_url(),
-                'drm_widewine_brand': self.get_widevine_brand(),
-                'subtitle': self.get_subtitle_url(data, 'srt')
-            })
+            if self.kodi_worker.use_timeshift and '_embedded' in data and 'channel' in data['_embedded'] and data['timeshift_available_livestream']:
+                source = self.get_timeshift_stream_url(video)
+                start_time = video.get_start_time_iso()
+                ts_url = "%s&begin=%s" % (source['src'], start_time)
+                video.set_url(ts_url)
+                video.set_stream({
+                    'url': ts_url,
+                    'drm': source['is_drm_protected'],
+                    'drm_token': source['drm_token'],
+                    'drm_widewine_url': self.get_widevine_url(),
+                    'drm_widewine_brand': self.get_widevine_brand(True),
+                    'subtitle': self.get_subtitle_url(data, 'srt')
+                })
+            else:
+                video.set_stream({
+                     'url': source['src'],
+                     'drm': source['is_drm_protected'],
+                     'drm_token': data['drm_token'],
+                     'drm_widewine_url': self.get_widevine_url(),
+                     'drm_widewine_brand': self.get_widevine_brand(),
+                     'subtitle': self.get_subtitle_url(data, 'srt')
+                })
+            video.debug()
             playlist.append(video)
         return playlist
 
@@ -644,6 +659,7 @@ class OrfOn:
         video_id = item['id']
         banner, backdrop, poster = self.get_images(item)
         item['channel_meta'] = self.channel_map
+        self.log("Video Link %s" % link)
         return Directory(title, description, link, video_id, video_type, banner, backdrop, poster, item, translator=self.kodi_worker)
 
     def clean_url(self, url):

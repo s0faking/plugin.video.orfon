@@ -187,3 +187,7 @@ msgstr "Ähnliche Inhalte"
 msgctxt "#30151"
 msgid "Show segements"
 msgstr "Kapitel anzeigen"
+
+msgctxt "#30152"
+msgid "Use timeshift"
+msgstr "Timeshift verwenden"

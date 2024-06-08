@@ -1,13 +1,16 @@
-v1.0.1 beta (2023-06-05)
+v1.0.2 (2024-06-08)
+- new Livestream (timeshift)
+- added setting to use old livestream format
+- LF conversion
+
+v1.0.1 beta (2024-06-05)
 - fix routing requirement
 - show segment option added
 - cache reload fix
 - related video option
 - fix UA stream errors (#6)
 
-
-
-v1.0.0 beta (2023-01-06)
+v1.0.0 beta (2024-01-06)
 - beta version
 - most stuff is working but everything needs to be tested a little more
 - orf on is still in beta so stuff might change until the final release in april 2024

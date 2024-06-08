@@ -187,3 +187,7 @@ msgstr ""
 msgctxt "#30151"
 msgid "Show segements"
 msgstr ""
+
+msgctxt "#30152"
+msgid "Use timeshift"
+msgstr ""

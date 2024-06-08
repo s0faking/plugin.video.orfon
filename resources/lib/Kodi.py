@@ -38,6 +38,7 @@ class Kodi:
         self.use_subtitles = self.addon.getSetting('useSubtitles') == 'true'
         self.use_segments = self.addon.getSetting('useSegments') == 'true'
         self.show_segments = self.addon.getSetting('showSegments') == 'true'
+        self.use_timeshift = self.addon.getSetting('useTimeshift') == 'true'
         self.hide_audio_description_content = self.addon.getSetting('hideAD') == 'true'
         self.hide_sign_language_content = self.addon.getSetting('hideOEGS') == 'true'
         self.useragent = self.addon.getSetting('userAgent')
