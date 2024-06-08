@@ -481,12 +481,12 @@ class OrfOn:
                 })
             else:
                 video.set_stream({
-                     'url': source['src'],
-                     'drm': source['is_drm_protected'],
-                     'drm_token': data['drm_token'],
-                     'drm_widewine_url': self.get_widevine_url(),
-                     'drm_widewine_brand': self.get_widevine_brand(),
-                     'subtitle': self.get_subtitle_url(data, 'srt')
+                    'url': source['src'],
+                    'drm': source['is_drm_protected'],
+                    'drm_token': data['drm_token'],
+                    'drm_widewine_url': self.get_widevine_url(),
+                    'drm_widewine_brand': self.get_widevine_brand(),
+                    'subtitle': self.get_subtitle_url(data, 'srt')
                 })
             video.debug()
             playlist.append(video)
@@ -642,7 +642,7 @@ class OrfOn:
         if self.use_segments:
             if 'segments_complete' in item and 'video_type' in item and item['video_type'] == 'episode' and '/segments' not in link and 'episode' in link:
                 self.log("Found video with segments.")
-                link = self.clean_url(link+"/segments")
+                link = self.clean_url(link + "/segments")
         else:
             if 'episode' in link and link.endswith('/segments'):
                 link = link.replace('/segments', '')

@@ -9,7 +9,7 @@ search_history_file = 'search_history'
 
 route_plugin = routing.Plugin()
 kodi_worker = Kodi(route_plugin)
-if not sys.argv[0].startswith('plugin://'+kodi_worker.addon_id+'/dialog'):
+if not sys.argv[0].startswith('plugin://' + kodi_worker.addon_id + '/dialog'):
     channel_map, channel_map_cached = kodi_worker.get_cached_file(channel_map_file)
     settings, settings_cached = kodi_worker.get_cached_file(settings_file)
     api = OrfOn(channel_map=channel_map, settings=settings, useragent=kodi_worker.useragent, kodi_worker=kodi_worker)
@@ -32,7 +32,11 @@ if not sys.argv[0].startswith('plugin://'+kodi_worker.addon_id+'/dialog'):
 def get_main_menu():
     kodi_worker.log("Loading Main Menu", 'route')
     if kodi_worker.is_geo_locked():
-        kodi_worker.render(Directory(kodi_worker.get_translation(30128, 'Geo lock active', ' [COLOR red]*** %s ***[/COLOR]'), kodi_worker.get_translation(30129, 'Some content may not be available in your country'), '/', translator=kodi_worker))
+        kodi_worker.render(
+            Directory(
+                kodi_worker.get_translation(30128, 'Geo lock active', ' [COLOR red]*** %s ***[/COLOR]'),
+                kodi_worker.get_translation(30129, 'Some content may not be available in your country'),
+                '/', translator=kodi_worker))
     index_directories = api.get_main_menu()
     for index_directory in index_directories:
         kodi_worker.render(index_directory)

@@ -28,7 +28,7 @@ class Kodi:
     input_stream_license_contenttype = 'application/octet-stream'
 
     geo_lock = False
-    max_cache_age = 60*60*24
+    max_cache_age = 60 * 60 * 24
 
     def __init__(self, plugin):
         self.plugin = plugin
@@ -43,7 +43,7 @@ class Kodi:
         self.hide_sign_language_content = self.addon.getSetting('hideOEGS') == 'true'
         self.useragent = self.addon.getSetting('userAgent')
         self.pager_limit = int(self.addon.getSetting('pagerLimit'))
-        self.max_cache_age = int(self.addon.getSetting('maxCacheAge'))*60*60*24
+        self.max_cache_age = int(self.addon.getSetting('maxCacheAge')) * 60 * 60 * 24
 
     def init_storage(self):
         if not os.path.exists(self.data_folder):
@@ -227,8 +227,8 @@ class Kodi:
     def build_info(self, item) -> dict:
         desc_prefix = self.build_meta_description(item)
         if desc_prefix is not None and item.get_description():
-            generated_description = desc_prefix+item.get_description()
-            generated_outline = desc_prefix+self.truncate_string(item.get_description())
+            generated_description = desc_prefix + item.get_description()
+            generated_outline = desc_prefix + self.truncate_string(item.get_description())
         else:
             generated_description = item.get_description()
             generated_outline = self.truncate_string(item.get_description())

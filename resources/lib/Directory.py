@@ -388,7 +388,7 @@ class Directory:
         contenttype = self.type()
         if self.label2() == 'Fernsehfilm':
             return 'movie'
-        if self.get_duration() is not None and self.get_duration() > 60*60:
+        if self.get_duration() is not None and self.get_duration() > 60 * 60:
             return 'movie'
         if contenttype == 'lane':
             return 'video'
