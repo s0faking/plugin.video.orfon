@@ -488,7 +488,6 @@ class OrfOn:
                     'drm_widewine_brand': self.get_widevine_brand(),
                     'subtitle': self.get_subtitle_url(data, 'srt')
                 })
-            video.debug()
             playlist.append(video)
         return playlist
 

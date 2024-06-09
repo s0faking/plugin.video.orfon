@@ -118,7 +118,6 @@ def get_segements(episodeid):
     videos = api.load_stream_data('/episode/%s/segments?limit=500' % episodeid)
     if kodi_worker.use_segments and kodi_worker.show_segments:
         for video in videos:
-            video.debug()
             kodi_worker.render(video)
         kodi_worker.list_callback()
     else:
