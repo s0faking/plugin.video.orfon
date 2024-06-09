@@ -1,4 +1,5 @@
-[!IMPORTANT] This addon has been merged onto https://github.com/s0faking/plugin.video.orftvthek [!IMPORTANT]
+> [!IMPORTANT]
+> This addon has been merged onto https://github.com/s0faking/plugin.video.orftvthek
 
 # ORF ON Addon for Kodi (plugin.video.orfon)
 
