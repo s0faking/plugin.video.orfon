@@ -1,3 +1,5 @@
+[!IMPORTANT] This addon has been merged onto https://github.com/s0faking/plugin.video.orftvthek [!IMPORTANT]
+
 # ORF ON Addon for Kodi (plugin.video.orfon)
 
 ORF ON is an addon that provides access to the ORF ON Video Platform (Austrian Television).
